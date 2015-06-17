@@ -1,0 +1,19 @@
+{
+  "name": "node-gitlab-autochangelog",
+  "version": "0.1.0",
+  "description": "利用 Gitlab 的 API 与 NodeJS，依据项目下的 milestone 与其 issues，自动生成 changelogs",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@git.cairenhui.com:gitlab/node-gitlab-autochangelog.git"
+  },
+  "keywords": [
+    "gitlab",
+    "changelog"
+  ],
+  "author": "wuwj <wuwj@cairenhui.com>",
+  "license": "MIT"
+}

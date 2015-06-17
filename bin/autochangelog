@@ -1,0 +1,141 @@
+#!/usr/bin/env node
+
+var fs = require('fs');
+var path = require('path');
+var Q = require("q");
+var request = require('request');
+var prompt = require('prompt');
+var semver = require('semver');
+
+var pkg = fs.readFileSync('./package.json', 'utf8');
+var config = fs.readFileSync('.git/config', 'utf8');
+var fullRepoName;
+var outputFileName;
+var items = [];
+
+var GITLAB = {
+  HOST: 'git.cairenhui.com',
+  API: 'http://git.cairenhui.com/api/v3'
+};
+
+init().then(getMilestones).then(generateChangeLog).fail(handleError);
+
+function init() {
+  var initDeferred = Q.defer();
+  fullRepoName = getFullRepoName();
+
+  console.log('=== AutoChangeLog v' + JSON.parse(pkg).version + ' ===\n');
+
+  if (!fullRepoName) {
+    console.log('\nCan\'t get the repo name of your project');
+  }
+
+  prompt.message = 'Enter';
+  prompt.start();
+  prompt.get([
+    {name: 'token', message: 'GitLab Token', required: true}, 
+    {name: 'output', message: 'Output File', default: 'CHANGELOG.md'}
+  ], function (err, result) {
+    if (err !== null) {
+      initDeferred.reject(err);
+      return;
+    }
+
+    console.log('Generating changelog for ' + fullRepoName + ' to', outputFileName = result.output);
+
+    initDeferred.resolve();
+    // getMilestones();
+  });
+
+  return initDeferred.promise;
+}
+
+function getMilestones() {
+  var deferred = Q.defer();
+
+  request(GITLAB.API + '/projects/obs%2Fbzb-mobile-fe/milestones?private_token=EhREiHujza7kNqVD8GsC', function (error, response, body) {
+    // console.log(JSON.parse(body));
+    var milestones = JSON.parse(body);
+    var promises = [];
+
+    milestones.forEach(function (milestone) {
+      var version = milestone.title;
+      var date    = milestone.created_at.substr(0, 10);
+      var id      = milestone.id;
+
+      var subDeferred = getIssuesInMilestone(id, version, date);
+      promises.push(subDeferred.promise);
+    });
+
+    Q.all(promises).then(function () {
+      deferred.resolve(items);
+    });
+  });
+
+  return deferred.promise;
+}
+
+function getIssuesInMilestone(id, version, date) {
+  var deferred = Q.defer();
+
+  request(GITLAB.API + '/projects/obs%2Fbzb-mobile-fe/milestones/' + id + '/issues?private_token=EhREiHujza7kNqVD8GsC', function (error, response, body) {
+    var issues = JSON.parse(body);
+    var _issues = [];
+
+    issues.forEach(function (issue) {
+      // console.log(issue.title);
+      _issues.push(issue.title);
+    });
+
+    _issues.unshift(version, date);
+
+    // console.log(_issues);
+    items.push(_issues);
+    deferred.resolve(items);
+  });
+
+  return deferred;
+}
+
+function generateChangeLog() {
+  items.sort(compareVersions);
+  // console.log(outputFileName);
+  var outputFileHandler = fs.openSync(outputFileName, 'w');
+  items.forEach(function (item) {
+    fs.writeSync(outputFileHandler, format(item) + '\n');
+    fs.writeSync(outputFileHandler, "\n")
+  });
+  fs.closeSync(outputFileHandler);
+  console.log('done!');
+}
+
+// Helps
+function getFullRepoName() {
+  return config.split(GITLAB.HOST)[1].split('\n')[0].replace(/(\:|\.git)/g, '');
+}
+
+function compareVersions(v1, v2) {
+  var _v1 = semver.clean(v1[0]);
+  var _v2 = semver.clean(v2[0]);
+
+  if (semver.lt(_v1, _v2)) {
+    return -1;
+  }
+
+  if (semver.gte(_v1, _v2)) {
+    return 1;
+  }
+  
+  return 0;
+}
+
+function format(item) {
+  var version = item.shift();
+  var date    = item.shift();
+
+  return ('## ' + version + ' (' + date + ')\n  - ' + item.join('\n  - '));
+}
+
+function handleError(error) {
+  console.log("AutoChangeLog failed because of error: ", error);
+}

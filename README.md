@@ -19,8 +19,24 @@ ok，完成在终端内输入 `autochangelog`，发现以下界面：
 
 （若项目不是一个 Git 项目，会直接报错：`It seems there's not any git projects`）
 
+### Gitlab Token
+
 第一行要求你输入 Gitlab Token，这个可以在 Gitlab 中你的个人设置里找到：`Profile settings -> Account`，右侧第一栏显示 `Reset Private token`，输入框内的一串字符就是你的 Gitlab Token 了，复制它粘贴到终端中，按回车。
+
+### Output File
 
 第二行是设定输出的文件名，默认是 `CHANGELOG.md`。
 
 在此按下回车后回，待运行完毕终端提示 "done!"，表示已完成。
+
+如何更新
+-------
+
+直接用 git 更新你本地的 autochangelog 项目即可：`git pull origin master`
+
+TODO
+-------
+
+- [ ] Gitlab Token 输入支持历史记录
+- [ ] milestone 可设置正序倒序排列
+- [ ] 每条 log 可增加与对应的 issue 和 指派者关联（etc. #31 @wuwj）

@@ -14,6 +14,9 @@ AutoChangeLog
 - 将 `autochangelog` 通过软链接添加至系统环境变量，成为可执行命令：`npm link`
 
 ok，完成在终端内输入 `autochangelog`，发现以下界面：
+
+![snap1](http://git.cairenhui.com/gitlab/node-gitlab-autochangelog/raw/master/snap/snap1.png)
+
 （若项目不是一个 Git 项目，会直接报错：`It seems there's not any git projects`）
 
 第一行要求你输入 Gitlab Token，这个可以在 Gitlab 中你的个人设置里找到：`Profile settings -> Account`，右侧第一栏显示 `Reset Private token`，输入框内的一串字符就是你的 Gitlab Token 了，复制它粘贴到终端中，按回车。

@@ -39,4 +39,4 @@ TODO
 
 - [ ] Gitlab Token 输入支持历史记录
 - [ ] milestone 可设置正序倒序排列
-- [ ] 每条 log 可增加与对应的 issue 和 指派者关联（etc. #31 @wuwj）
+- [ ] 每条 log 可增加与之对应的 issue 和 指派者关联（etc. #31 @wuwj）

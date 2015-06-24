@@ -1,6 +1,6 @@
 {
   "name": "autochangelog",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "利用 Gitlab 的 API 与 NodeJS，依据项目下的 milestone 与其 issues，自动生成 changelogs",
   "private": true,
   "main": "lib/autochangelog",
@@ -28,7 +28,8 @@
     "prompt": "^0.2.14",
     "q": "^1.4.1",
     "request": "^2.58.0",
-    "semver": "^4.3.6"
+    "semver": "^4.3.6",
+    "yargs": "^3.12.0"
   },
   "devDependencies": {
     "expect.js": "^0.3.1"

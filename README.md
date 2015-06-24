@@ -1,7 +1,11 @@
 AutoChangeLog
 ===
 
-Using Gitlab API to get milestones and its issues，generating changelogs automatically.
+[![npm package](https://img.shields.io/npm/v/autochangelog.svg?style=flat-square)](https://www.npmjs.org/package/autochangelog)
+[![build status](https://img.shields.io/travis/roshanca/gitlab-autochangelog/master.svg?style=flat-square)](https://travis-ci.org/roshanca/gitlab-autochangelog)
+[![dependency status](https://img.shields.io/david/roshanca/gitlab-autochangelog.svg?style=flat-square)](https://david-dm.org/roshanca/gitlab-autochangelog)
+
+Using Gitlab API to get milestones and its issues, generating changelogs automatically.
 
 Installation
 -------
@@ -42,4 +46,13 @@ TODO
 
 - [ ] Gitlab Token input supports history.
 - [ ] Milestone can be ordered by both desc and asc.
-- [ ] Add association of specific issue and assignee.(etc. #31 @wuwj)
+- [ ] Add refs to specific issue and assignee in each log.(etc. #31 @wuwj)
+
+Inspired by
+-------
+
+[node-github-autochangelog](https://github.com/kaosat-dev/node-github-autochangelog)
+
+License
+-------
+MIT license (© 2015 Roshan Wu)

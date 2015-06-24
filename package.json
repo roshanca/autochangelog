@@ -1,15 +1,14 @@
 {
   "name": "autochangelog",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Automatic generation of changelogs using the gitlab api + nodejs",
-  "private": true,
   "main": "lib/autochangelog",
   "preferGlobal": "true",
   "bin": {
     "autochangelog": "lib/autochangelog.js"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "jshint --reporter=node_modules/jshint-stylish lib/autochangelog.js"
   },
   "repository": {
     "type": "git",
@@ -22,7 +21,10 @@
   "engines": {
     "node": ">= 0.10.0"
   },
-  "author": "wuwj <wuwj@cairenhui.com>",
+  "author": {
+    "name": "Roshan Wu",
+    "email": "wwj1983@gmail.com"
+  },
   "license": "MIT",
   "dependencies": {
     "prompt": "^0.2.14",
@@ -30,5 +32,8 @@
     "request": "^2.58.0",
     "semver": "^4.3.6",
     "yargs": "^3.12.0"
+  },
+  "devDependencies": {
+    "jshint-stylish": "^2.0.1"
   }
 }

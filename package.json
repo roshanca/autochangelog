@@ -1,7 +1,7 @@
 {
   "name": "autochangelog",
   "version": "0.3.0",
-  "description": "利用 Gitlab 的 API 与 NodeJS，依据项目下的 milestone 与其 issues，自动生成 changelogs",
+  "description": "Automatic generation of changelogs using the gitlab api + nodejs",
   "private": true,
   "main": "lib/autochangelog",
   "preferGlobal": "true",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@git.cairenhui.com:gitlab/node-gitlab-autochangelog.git"
+    "url": "git@github.com:roshanca/gitlab-autochangelog.git"
   },
   "keywords": [
     "gitlab",
@@ -30,8 +30,5 @@
     "request": "^2.58.0",
     "semver": "^4.3.6",
     "yargs": "^3.12.0"
-  },
-  "devDependencies": {
-    "expect.js": "^0.3.1"
   }
 }

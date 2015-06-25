@@ -8,7 +8,7 @@
     "autochangelog": "lib/autochangelog.js"
   },
   "scripts": {
-    "test": "jshint --reporter=node_modules/jshint-stylish lib/autochangelog.js"
+    "test": "node_modules/.bin/jshint --reporter=node_modules/jshint-stylish lib/autochangelog.js"
   },
   "repository": {
     "type": "git",
@@ -34,6 +34,7 @@
     "yargs": "^3.12.0"
   },
   "devDependencies": {
+    "jshint": "^2.8.0",
     "jshint-stylish": "^2.0.1"
   }
 }

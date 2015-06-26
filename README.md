@@ -25,12 +25,6 @@ Type 'autochangelog' in your Terminal.
 $ autochangelog
 ```
 
-With some options, for example, get helps:
-
-```
-$ autochangelog -h
-```
-
 For the next:
 
 ### Gitlab Token
@@ -41,11 +35,17 @@ You can find this in your Gitlab: `Profile settings -> Account`，at the right s
 
 Output file name, default is `CHANGELOG.md`.
 
+Get more helps:
+
+```
+$ autochangelog -h
+```
+
 TODO
 -------
 
-- [ ] Gitlab Token input supports history.
-- [ ] Milestone can be ordered by both desc and asc.
+- [x] Gitlab Token input supports history.
+- [x] The order of milestones in Changelog can be reversed.
 - [ ] Add refs to specific issue and assignee in each log.(etc. #31 @wuwj)
 
 Inspired by

@@ -1,6 +1,6 @@
 {
   "name": "autochangelog",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Automatic generation of changelogs using the gitlab api + nodejs",
   "main": "lib/autochangelog",
   "preferGlobal": "true",
@@ -8,7 +8,7 @@
     "autochangelog": "lib/autochangelog.js"
   },
   "scripts": {
-    "test": "node_modules/.bin/jshint --reporter=node_modules/jshint-stylish lib/autochangelog.js"
+    "test": "./node_modules/.bin/jshint --reporter=node_modules/jshint-stylish lib/autochangelog.js"
   },
   "repository": {
     "type": "git",

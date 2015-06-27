@@ -53,6 +53,11 @@ Inspired by
 
 [node-github-autochangelog](https://github.com/kaosat-dev/node-github-autochangelog)
 
+Chinese
+-------
+
+[CHINESE.md](https://github.com/roshanca/gitlab-autochangelog/blob/master/CHINESE.md)
+
 License
 -------
 MIT license (© 2015 Roshan Wu)

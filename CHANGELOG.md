@@ -1,3 +1,6 @@
+## 0.3.4 (2015-06-30)
+  - Fix: assignee's username
+
 ## 0.3.3 (2015-06-30)
   - Add refs to specific issue and assignee in each log.(etc. #31 @wuwj)
 

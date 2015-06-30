@@ -1,6 +1,6 @@
 {
   "name": "autochangelog",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Automatic generation of changelogs using the gitlab api + nodejs",
   "main": "lib/autochangelog",
   "preferGlobal": "true",

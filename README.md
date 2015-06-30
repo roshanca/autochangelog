@@ -46,7 +46,7 @@ TODO
 
 - [x] Gitlab Token input supports history.
 - [x] The order of milestones in Changelog can be reversed.
-- [ ] Add refs to specific issue and assignee in each log.(etc. #31 @wuwj)
+- [x] Add refs to specific issue and assignee in each log.(etc. #31 @wuwj)
 
 Inspired by
 -------

@@ -41,7 +41,7 @@ TODO
 
 - [x] Gitlab Token 输入支持历史记录
 - [x] milestones 的排列顺序可颠倒
-- [ ] 每条 log 可增加与之对应的 issue 和 指派者关联（比如：#31 @wuwj）
+- [x] 每条 log 可增加与之对应的 issue 和 指派者关联（比如：#31 @wuwj）
 
 灵感来源
 -------

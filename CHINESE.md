@@ -35,6 +35,17 @@ $ autochangelog
 
 第二行是设定输出的文件名，默认是 `CHANGELOG.md`。
 
+获得更多帮助:
+
+```
+$ autochangelog -h
+```
+
+利用 `--host` 和 `--api` 的选项，将默认的 host 和 api 改为你自己的。
+
+```
+$ autochangelog --host 'gitlab.your-site.com' --api 'https://gitlab.your-site.com/api/v3'
+```
 
 TODO
 -------

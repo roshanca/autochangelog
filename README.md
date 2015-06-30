@@ -41,6 +41,12 @@ Get more helps:
 $ autochangelog -h
 ```
 
+With options `--host` and `--api`, you can change the default host and api address to your own.
+
+```
+$ autochangelog --host 'gitlab.your-site.com' --api 'https://gitlab.your-site.com/api/v3'
+```
+
 TODO
 -------
 

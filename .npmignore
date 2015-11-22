@@ -1,0 +1,10 @@
+typings
+tsd.json
+tsconfig.json
+.npmignore
+.gitignore
+.gitmodules
+.gitattributes
+.editorconfig
+.travis.yml
+.vscode

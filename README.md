@@ -5,7 +5,7 @@ AutoChangeLog
 [![build status](https://img.shields.io/travis/roshanca/gitlab-autochangelog/master.svg?style=flat-square)](https://travis-ci.org/roshanca/gitlab-autochangelog)
 [![dependency status](https://img.shields.io/david/roshanca/gitlab-autochangelog.svg?style=flat-square)](https://david-dm.org/roshanca/gitlab-autochangelog)
 
-Using Gitlab API to get milestones and its issues, generating changelogs automatically.
+Using Gitlab API to get milestones and issues, generating changelogs automatically.
 
 Installation
 -------
@@ -19,50 +19,15 @@ $ npm install -g autochangelog
 Usage
 -------
 
-Type 'autochangelog' in your Terminal.
-
 ```
 $ autochangelog
 ```
-
-For the next:
-
-### Gitlab Token
-
-You can find this in your Gitlab: `Profile settings -> Account`，at the right side just below the `Reset Private token` showing a string in the input field.
-
-### Output File
-
-Output file name, default is `CHANGELOG.md`.
 
 Get more helps:
 
 ```
 $ autochangelog -h
 ```
-
-With options `--host` and `--api`, you can change the default host and api address to your own.
-
-```
-$ autochangelog --host 'gitlab.your-site.com' --api 'https://gitlab.your-site.com/api/v3'
-```
-
-TODO
--------
-
-- [x] Gitlab Token input supports history.
-- [x] The order of milestones in Changelog can be reversed.
-- [x] Add refs to specific issue and assignee in each log.(etc. #31 @wuwj)
-
-Inspired by
--------
-
-[node-github-autochangelog](https://github.com/kaosat-dev/node-github-autochangelog)
-
-Chinese
--------
-
-[CHINESE.md](https://github.com/roshanca/gitlab-autochangelog/blob/master/CHINESE.md)
 
 License
 -------

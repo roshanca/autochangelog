@@ -1,0 +1,12 @@
+{
+  "rules": {
+    "curly": true,
+		"eofline": true,
+    "quotemark": [
+      true,
+      "single"
+    ],
+    "semicolon": false,
+    "prefer-const": true
+  }
+}

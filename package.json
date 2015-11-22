@@ -1,40 +1,40 @@
 {
   "name": "autochangelog",
-  "version": "0.3.4",
-  "description": "Automatic generation of changelogs using the gitlab api + nodejs",
-  "main": "lib/autochangelog",
-  "preferGlobal": "true",
-  "bin": {
-    "autochangelog": "lib/autochangelog.js"
-  },
-  "scripts": {
-    "test": "./node_modules/.bin/jshint --reporter=node_modules/jshint-stylish lib/autochangelog.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:roshanca/gitlab-autochangelog.git"
-  },
+  "version": "1.0.0",
+  "description": "Using Gitlab API to get milestones and issues, generating changelogs automatically.",
   "keywords": [
-    "gitlab",
+    "cli",
     "changelog"
   ],
   "engines": {
     "node": ">= 0.10.0"
   },
+  "bin": {
+    "autochangelog": "./index.js"
+  },
+  "preferGlobal": true,
+  "main": "index.js",
+  "dependencies": {
+    "commander": "^2.9.0",
+    "jsonfile": "^2.2.3",
+    "prompt": "^0.2.14",
+    "request": "^2.67.0",
+    "semver": "^5.1.0"
+  },
+  "devDependencies": {
+    "tslint": "^3.0.0",
+    "typescript": "^1.6.2"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/tslint index.ts"
+  },
   "author": {
     "name": "Roshan Wu",
     "email": "wwj1983@gmail.com"
   },
-  "license": "MIT",
-  "dependencies": {
-    "prompt": "^0.2.14",
-    "q": "^1.4.1",
-    "request": "^2.58.0",
-    "semver": "^4.3.6",
-    "yargs": "^3.12.0"
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:roshanca/gitlab-autochangelog.git"
   },
-  "devDependencies": {
-    "jshint": "^2.8.0",
-    "jshint-stylish": "^2.0.1"
-  }
+  "license": "MIT"
 }

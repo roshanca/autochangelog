@@ -1,9 +1,46 @@
 #!/usr/bin/env node --harmony
 
+interface Config {
+  host: string
+  api: string
+  token: string
+}
+
+interface Milestone {
+  id: number
+  iid: number
+  project_id: number
+  title: string
+  description: string
+  state: string
+  created_at: string
+  updated_at: string
+  due_date: any
+}
+
+interface Issue {
+  id: number
+  iid: number
+  title: string
+  description: string
+  state: string
+  created_at: string
+  updated_at: string
+  labels?: string[]
+  milestone?: Milestone
+  assignee?: any
+  author?: any
+}
+
+interface Log {
+  version: string
+  content: string[]
+}
+
 /**
  * Module dependencies.
  */
-const fs = require('fs')
+const fs = require('fs');
 const path = require('path')
 const _prompt = require('prompt')
 const jsonfile = require('jsonfile')
@@ -23,7 +60,7 @@ const CONFIG = {
 
 const PROMPT = {
   
-  // description display at top in console
+  // description display at the top of console
   DESC: 'You have not configed it yet, have you?\n' +
       'Please to work it out according to the interactive prompt.\n' +
       'It will creating config file (.changelogrc) in your system automatically.\n\n' +
@@ -51,37 +88,34 @@ const PROMPT = {
 }
 
 // absolute path of current project
-const root = process.cwd()
+const root: string = process.cwd()
 
 // config file: ~/.changelogrc
-const configFile = path.resolve(process.env.HOME, CONFIG.FILE);
-
-// read version from package.json
-function getVersion() {
-  return require('./package').version
-}
+const configFile: string = path.resolve(process.env.HOME, CONFIG.FILE);
 
 // CLI control
 program
-  .version(getVersion())
+  .version(require('./package').version)
   .parse(process.argv)
 
 ;(async function () {
+  'use strict'
+  
   try {
-    const isConfigFileExist = await isFileExists(configFile)
+    let config: Config = await getConfing()
     
-    if (!isConfigFileExist) {
-      await createConfigFile()
+    if (!config) {
+      config = await createConfigFile()
     }
     
-    const token = getToken()
-    const projectPath = getProjectPath()
+    const token: string = config.token
+    const projectPath: string = getProjectPath()
     
-    const milestonesApi = `${CONFIG.API}/projects/${encodeURIComponent(projectPath)}/milestones?private_token=${token}`
-    const issuesApi = `${CONFIG.API}/projects/${encodeURIComponent(projectPath)}/milestones/#{milestoneId}/issues?private_token=${token}`
+    const milestonesApi: string = `${CONFIG.API}/projects/${encodeURIComponent(projectPath)}/milestones?private_token=${token}`
+    const issuesApi: string = `${CONFIG.API}/projects/${encodeURIComponent(projectPath)}/milestones/#{milestoneId}/issues?private_token=${token}`
     
-    const milestones = await fetchMilestones(milestonesApi)
-    const logs = await generateLogs(milestones, issuesApi)
+    const milestones: Milestone[] = await fetchMilestones(milestonesApi)
+    const logs: Log[] = await generateLogs(milestones, issuesApi)
     
     console.log(`Generating changelog of ${projectPath} to ${CONFIG.OUTPUT}`)
     generateChangeLog(logs)
@@ -90,11 +124,11 @@ program
   }
 })()
 
-async function isFileExists(file) {
+function getConfing(): Promise<Config> {
   return new Promise((resolve, reject) => {
-    fs.stat(file, (e, stat) => {
-      if (e === null && stat.isFile()) {
-        resolve(true)
+    jsonfile.readFile(configFile, (e, data) => {
+      if (!e) {
+        resolve(data)
       } else {
         resolve(false)
       }
@@ -102,7 +136,7 @@ async function isFileExists(file) {
   })
 }
 
-async function createConfigFile() {
+function createConfigFile(): Promise<Config> {
   return new Promise((resolve, reject) => {
     console.log(PROMPT.DESC)
     
@@ -110,21 +144,21 @@ async function createConfigFile() {
     _prompt.start();
     _prompt.get(PROMPT.OPTIONS, (e, result) => {
       if (e) {
-        reject(e)
+        reject(`\n${e}`)
         return
       }
   
-      const content = {
+      const content: Config = {
         host: result.host,
         api: result.api,
         token: result.token
       };
   
-      jsonfile.writeFile(configFile, content, () => {
-        try {
-          resolve(true)
-        } catch (e) {
-          console.error(e)
+      jsonfile.writeFile(configFile, content, (e) => {
+        if (!e) {
+          resolve(content)
+        } else {
+          reject(`Unable to write file: ${configFile}`)
         }
       })
     });
@@ -138,16 +172,16 @@ async function createConfigFile() {
  * @example of the api: 
  * http://git.cairenhui.com/api/v3/projects/OOS%2Foos-web-fe/milestones??per_page=30&private_token=Wk9deBZUz9_6gPZbysxj
  */
-async function fetchMilestones(api) {
+function fetchMilestones(api: string): Promise<Milestone[]> {
   return new Promise((resolve, reject) => {
     request(api, (e, response, body) => {      
       if (!e && response.statusCode === 200) {
-        const milestones = JSON.parse(body)
+        const milestones: Milestone[] = JSON.parse(body)
         resolve(milestones)
       } else if (response) {
-        console.error(`Unable to fetch milestones because: ${JSON.parse(response.body).message}`)
+        reject(`Unable to fetch milestones because: ${JSON.parse(response.body).message}`)
       } else {
-        console.error(e)
+        reject(e)
       }
     })
   })
@@ -159,10 +193,10 @@ async function fetchMilestones(api) {
  * @param  {any} milestones
  * @param  {any} api
  */
-async function generateLogs(milestones, api) {
+async function generateLogs(milestones: Milestone[], api: string): Promise<Log[]> {
   'use strict'
   
-  let promises = milestones.map((milestone) => generateLog(milestone, api))
+  let promises: Promise<Log>[] = milestones.map((milestone) => generateLog(milestone, api))
   
   return await Promise.all(promises)
 }
@@ -173,15 +207,15 @@ async function generateLogs(milestones, api) {
  * @param  {any} milestone
  * @param  {any} api
  */
-async function generateLog(milestone, api) {
+function generateLog(milestone: Milestone, api: string): Promise<Log> {
   return new Promise((resolve, reject) => {
-    request(api.replace(/#{milestoneId}/, milestone.id), (e, response, body) => {
+    request(api.replace(/#{milestoneId}/, `${milestone.id}`), (e, response, body) => {
       'use strict'
       
       if (!e && response.statusCode === 200) {
-        const version = milestone.title
-        const update = milestone.created_at.substr(0, 10)
-        const issues = JSON.parse(body)
+        const version: string = milestone.title
+        const update: string = milestone.created_at.substr(0, 10)
+        const issues: Issue[] = JSON.parse(body)
         
         let content = issues.map((issue) => {
           return `- ${issue.title} (#${issue.iid} @${issue.assignee.username})`
@@ -194,9 +228,9 @@ async function generateLog(milestone, api) {
           content: content
         })
       } else if (response) {
-        console.error(`Unable to fetch issues of ${milestone.id} milestone because: ${JSON.parse(response.body).message}`)
+        reject(`Unable to fetch issues of ${milestone.id} milestone because: ${JSON.parse(response.body).message}`)
       } else {
-        console.error(e)
+        reject(e)
       }
     })
   })
@@ -207,17 +241,24 @@ async function generateLog(milestone, api) {
  * 
  * @param  {any} logs
  */
-function generateChangeLog(logs) {
+function generateChangeLog(logs: Log[]) {
   'use strict'
+  
   logs = logs.sort(compareVersions)
   // console.log(logs)
-  let body = logs.map((log) => {
+  
+  let body: any = logs.map((log) => {
     return log.content.join('\n')
   })
+  
   // console.log(body)
   body = body.join('\n\n')
   fs.writeFile(CONFIG.OUTPUT, body, (e) => {
-    console.log(`\nOK, ${CONFIG.OUTPUT} generated successfully!`)
+    if (!e) {
+      console.log(`\nOK, ${CONFIG.OUTPUT} generated successfully!`)
+    } else {
+      console.error(e)
+    }
   })
 }
 
@@ -226,11 +267,11 @@ function generateChangeLog(logs) {
  * 
  * @return  {string} projectPath
  */
-function getProjectPath() {
+function getProjectPath(): string {
   'use strict'
   
-  let gitConfig
-  let projectPath
+  let gitConfig: Config
+  let projectPath: string
   
   try {
     gitConfig = fs.readFileSync('.git/config', {encoding: 'utf8'})
@@ -239,21 +280,12 @@ function getProjectPath() {
   }
   
   try {
-    projectPath = gitConfig.split(CONFIG.HOST)[1].split('\n')[0].replace(/(\:|\.git)/g, '')
+    projectPath = `${gitConfig}`.split(CONFIG.HOST)[1].split('\n')[0].replace(/(\:|\.git)/g, '')
   } catch (e) {
     throw `No gitlab project found in ${root}`
   }
   
   return projectPath
-}
-
-/**
- * Get the token stored in config file (~/.changelogrc)
- * 
- * @return  {string} token
- */
-function getToken() {
-  return jsonfile.readFileSync(configFile).token
 }
 
 /**

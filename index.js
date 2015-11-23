@@ -51,20 +51,18 @@ const PROMPT = {
 };
 const root = process.cwd();
 const configFile = path.resolve(process.env.HOME, CONFIG.FILE);
-function getVersion() {
-    return require('./package').version;
-}
 program
-    .version(getVersion())
+    .version(require('./package').version)
     .parse(process.argv);
 (function () {
     return __awaiter(this, void 0, Promise, function* () {
+        'use strict';
         try {
-            const isConfigFileExist = yield isFileExists(configFile);
-            if (!isConfigFileExist) {
-                yield createConfigFile();
+            let config = yield getConfing();
+            if (!config) {
+                config = yield createConfigFile();
             }
-            const token = getToken();
+            const token = config.token;
             const projectPath = getProjectPath();
             const milestonesApi = `${CONFIG.API}/projects/${encodeURIComponent(projectPath)}/milestones?private_token=${token}`;
             const issuesApi = `${CONFIG.API}/projects/${encodeURIComponent(projectPath)}/milestones/#{milestoneId}/issues?private_token=${token}`;
@@ -78,63 +76,57 @@ program
         }
     });
 })();
-function isFileExists(file) {
-    return __awaiter(this, void 0, Promise, function* () {
-        return new Promise((resolve, reject) => {
-            fs.stat(file, (e, stat) => {
-                if (e === null && stat.isFile()) {
-                    resolve(true);
-                }
-                else {
-                    resolve(false);
-                }
-            });
+function getConfing() {
+    return new Promise((resolve, reject) => {
+        jsonfile.readFile(configFile, (e, data) => {
+            if (!e) {
+                resolve(data);
+            }
+            else {
+                resolve(false);
+            }
         });
     });
 }
 function createConfigFile() {
-    return __awaiter(this, void 0, Promise, function* () {
-        return new Promise((resolve, reject) => {
-            console.log(PROMPT.DESC);
-            _prompt.message = 'Enter';
-            _prompt.start();
-            _prompt.get(PROMPT.OPTIONS, (e, result) => {
-                if (e) {
-                    reject(e);
-                    return;
+    return new Promise((resolve, reject) => {
+        console.log(PROMPT.DESC);
+        _prompt.message = 'Enter';
+        _prompt.start();
+        _prompt.get(PROMPT.OPTIONS, (e, result) => {
+            if (e) {
+                reject(`\n${e}`);
+                return;
+            }
+            const content = {
+                host: result.host,
+                api: result.api,
+                token: result.token
+            };
+            jsonfile.writeFile(configFile, content, (e) => {
+                if (!e) {
+                    resolve(content);
                 }
-                const content = {
-                    host: result.host,
-                    api: result.api,
-                    token: result.token
-                };
-                jsonfile.writeFile(configFile, content, () => {
-                    try {
-                        resolve(true);
-                    }
-                    catch (e) {
-                        console.error(e);
-                    }
-                });
+                else {
+                    reject(`Unable to write file: ${configFile}`);
+                }
             });
         });
     });
 }
 function fetchMilestones(api) {
-    return __awaiter(this, void 0, Promise, function* () {
-        return new Promise((resolve, reject) => {
-            request(api, (e, response, body) => {
-                if (!e && response.statusCode === 200) {
-                    const milestones = JSON.parse(body);
-                    resolve(milestones);
-                }
-                else if (response) {
-                    console.error(`Unable to fetch milestones because: ${JSON.parse(response.body).message}`);
-                }
-                else {
-                    console.error(e);
-                }
-            });
+    return new Promise((resolve, reject) => {
+        request(api, (e, response, body) => {
+            if (!e && response.statusCode === 200) {
+                const milestones = JSON.parse(body);
+                resolve(milestones);
+            }
+            else if (response) {
+                reject(`Unable to fetch milestones because: ${JSON.parse(response.body).message}`);
+            }
+            else {
+                reject(e);
+            }
         });
     });
 }
@@ -146,30 +138,28 @@ function generateLogs(milestones, api) {
     });
 }
 function generateLog(milestone, api) {
-    return __awaiter(this, void 0, Promise, function* () {
-        return new Promise((resolve, reject) => {
-            request(api.replace(/#{milestoneId}/, milestone.id), (e, response, body) => {
-                'use strict';
-                if (!e && response.statusCode === 200) {
-                    const version = milestone.title;
-                    const update = milestone.created_at.substr(0, 10);
-                    const issues = JSON.parse(body);
-                    let content = issues.map((issue) => {
-                        return `- ${issue.title} (#${issue.iid} @${issue.assignee.username})`;
-                    });
-                    content.unshift(`## ${version} - ${update}`);
-                    resolve({
-                        version: version,
-                        content: content
-                    });
-                }
-                else if (response) {
-                    console.error(`Unable to fetch issues of ${milestone.id} milestone because: ${JSON.parse(response.body).message}`);
-                }
-                else {
-                    console.error(e);
-                }
-            });
+    return new Promise((resolve, reject) => {
+        request(api.replace(/#{milestoneId}/, `${milestone.id}`), (e, response, body) => {
+            'use strict';
+            if (!e && response.statusCode === 200) {
+                const version = milestone.title;
+                const update = milestone.created_at.substr(0, 10);
+                const issues = JSON.parse(body);
+                let content = issues.map((issue) => {
+                    return `- ${issue.title} (#${issue.iid} @${issue.assignee.username})`;
+                });
+                content.unshift(`## ${version} - ${update}`);
+                resolve({
+                    version: version,
+                    content: content
+                });
+            }
+            else if (response) {
+                reject(`Unable to fetch issues of ${milestone.id} milestone because: ${JSON.parse(response.body).message}`);
+            }
+            else {
+                reject(e);
+            }
         });
     });
 }
@@ -181,7 +171,12 @@ function generateChangeLog(logs) {
     });
     body = body.join('\n\n');
     fs.writeFile(CONFIG.OUTPUT, body, (e) => {
-        console.log(`\nOK, ${CONFIG.OUTPUT} generated successfully!`);
+        if (!e) {
+            console.log(`\nOK, ${CONFIG.OUTPUT} generated successfully!`);
+        }
+        else {
+            console.error(e);
+        }
     });
 }
 function getProjectPath() {
@@ -195,15 +190,12 @@ function getProjectPath() {
         throw `It can't be done because it's not a git project.`;
     }
     try {
-        projectPath = gitConfig.split(CONFIG.HOST)[1].split('\n')[0].replace(/(\:|\.git)/g, '');
+        projectPath = `${gitConfig}`.split(CONFIG.HOST)[1].split('\n')[0].replace(/(\:|\.git)/g, '');
     }
     catch (e) {
         throw `No gitlab project found in ${root}`;
     }
     return projectPath;
-}
-function getToken() {
-    return jsonfile.readFileSync(configFile).token;
 }
 function compareVersions(v1, v2) {
     var _v1 = semver.clean(v1.version);

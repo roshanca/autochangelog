@@ -2,6 +2,15 @@
   "rules": {
     "curly": true,
 		"eofline": true,
+    "forin": true,
+    "indent": "spaces",
+    "jsdoc-format": true,
+    "interface-name": false,
+    "triple-equals": true,
+    "use-strict": [
+      "check-function",
+      "check-module"
+    ],
     "quotemark": [
       true,
       "single"

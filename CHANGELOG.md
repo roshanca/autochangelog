@@ -1,3 +1,9 @@
+## 1.1.0 - 2015-11-23
+- Add type define and imporve error handler.
+
+## 1.0.0 - 2015-11-22
+- Refactoring code with TypeScript.
+
 ## 0.9.0 - 2015-06-23
 
 ## 0.3.4 - 2015-06-30

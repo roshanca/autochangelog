@@ -168,7 +168,7 @@ function createConfigFile(): Promise<Config> {
 /**
  * Fetch all the milestones from the given api.
  * 
- * @param  {any} api
+ * @param  {string} api
  * @example of the api: 
  * http://git.cairenhui.com/api/v3/projects/OOS%2Foos-web-fe/milestones??per_page=30&private_token=Wk9deBZUz9_6gPZbysxj
  */
@@ -190,8 +190,8 @@ function fetchMilestones(api: string): Promise<Milestone[]> {
 /**
  * * Generating all the logs from milestones and the given api.
  * 
- * @param  {any} milestones
- * @param  {any} api
+ * @param  {Milestone[]} milestones
+ * @param  {string} api
  */
 async function generateLogs(milestones: Milestone[], api: string): Promise<Log[]> {
   'use strict'
@@ -204,8 +204,8 @@ async function generateLogs(milestones: Milestone[], api: string): Promise<Log[]
 /**
  * Generatin single log from specific milestone and the given api.
  * 
- * @param  {any} milestone
- * @param  {any} api
+ * @param  {Milestone} milestone
+ * @param  {string} api
  */
 function generateLog(milestone: Milestone, api: string): Promise<Log> {
   return new Promise((resolve, reject) => {
@@ -239,7 +239,7 @@ function generateLog(milestone: Milestone, api: string): Promise<Log> {
 /**
  * Write the changelog into the output file.
  * 
- * @param  {any} logs
+ * @param  {Log[]} logs
  */
 function generateChangeLog(logs: Log[]) {
   'use strict'

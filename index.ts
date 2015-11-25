@@ -61,13 +61,13 @@ const CONFIG = {
 
 const PROMPT = {
   
-  // description display at the top of console
-  DESC: 'You have not configed it yet, have you?\n' +
-      'Please to work it out according to the interactive prompt.\n' +
-      'It will creating config file (.changelogrc) in your system automatically.\n\n' +
-      '(If you have no idea about what token is, find it in your gitlab site by ' +
-      'following "Profile Setting" - "Account" - "Reset Private token")\n\n' +
-      'Press ^C at any time to quit.\n',
+  // description display at the top of console when prompting
+  DESC: 'You have not configured it yet, have you?\n' +
+  'Please to work it out with the interactive prompt below.\n' +
+  'It will create a config file (.changelogrc) in your system.\n\n' +
+  '(If you have no idea about what token is, find it in your gitlab site by ' +
+  'following "Profile Setting" - "Account" - "Reset Private token")\n\n' +
+  'Press ^C at any time to quit.\n',
       
   // options for prompt
   OPTIONS: [
@@ -140,7 +140,7 @@ function getConfing(): Promise<Config> {
 function createConfigFile(): Promise<Config> {
   return new Promise((resolve, reject) => {
     console.log(PROMPT.DESC)
-    
+
     _prompt.message = 'Enter';
     _prompt.start();
     _prompt.get(PROMPT.OPTIONS, (e, result) => {
@@ -148,15 +148,16 @@ function createConfigFile(): Promise<Config> {
         reject(`\n${e}`)
         return
       }
-  
+
       const content: Config = {
         host: result.host,
         api: result.api,
         token: result.token
       };
-  
+
       jsonfile.writeFile(configFile, content, (e) => {
         if (!e) {
+          console.log('\n')
           resolve(content)
         } else {
           reject(`Unable to write file: ${configFile}`)
@@ -174,18 +175,35 @@ function createConfigFile(): Promise<Config> {
  * http://git.cairenhui.com/api/v3/projects/OOS%2Foos-web-fe/milestones??per_page=30&private_token=Wk9deBZUz9_6gPZbysxj
  */
 function fetchMilestones(api: string): Promise<Milestone[]> {
-  return new Promise((resolve, reject) => {
-    request(api, (e, response, body) => {      
+  const promise =  new Promise((resolve, reject) => {
+    request(api, (e, response, body) => {
       if (!e && response.statusCode === 200) {
         const milestones: Milestone[] = JSON.parse(body)
-        resolve(milestones)
+        if (milestones.length) {
+          resolve(milestones)
+        } else {
+          reject('There\'s no milestone yet.')
+        }
       } else if (response) {
-        reject(`Unable to fetch milestones because: ${JSON.parse(response.body).message}`)
+        reject(`Unable to fetch milestones because: ${JSON.parse(response.body).message}.`)
       } else {
         reject(e)
       }
     })
+    .on('response', () => {
+      console.log('Starting to fetch all the milestones of this project.\n')
+    })
   })
+  
+  promise.then((response: Object[]) => {
+    if (response.length > 1) {
+      console.log(`Get ${response.length} milestones totally.\nGetting start to fetch all the issues of these milestones:\n`)
+    } else if (response.length === 1) {
+      console.log('Get only one milestone, fetch the issues of this milestone:\n')
+    }
+  })
+  
+  return promise
 }
 
 /**
@@ -227,18 +245,18 @@ function generateLog(milestone: Milestone, api: string): Promise<Log> {
   return new Promise((resolve, reject) => {
     request(api.replace(/#{milestoneId}/, `${milestone.id}`), (e, response, body) => {
       'use strict'
-      
+
       if (!e && response.statusCode === 200) {
         const version: string = milestone.title
         const update: string = milestone.created_at.substr(0, 10)
         const issues: Issue[] = JSON.parse(body)
-        
-        let content = issues.map((issue) => {
+
+        let content: string[] = issues.map((issue) => {
           return `- ${issue.title} (#${issue.iid} @${issue.assignee.username})`
         })
-        
+
         content.unshift(`## ${version} - ${update}`)
-        
+
         resolve({
           version: version,
           content: content
@@ -259,6 +277,8 @@ function generateLog(milestone: Milestone, api: string): Promise<Log> {
  */
 function generateChangeLog(logs: Log[]) {
   'use strict'
+  
+  console.log(`\nGenerating changelog into ${CONFIG.OUTPUT}`)
   
   logs = logs.sort(compareVersions)
   // console.log(logs)
@@ -285,39 +305,43 @@ function generateChangeLog(logs: Log[]) {
  */
 function getProjectPath(): string {
   'use strict'
-  
+
   let gitConfig: Config
   let projectPath: string
-  
+
   try {
-    gitConfig = fs.readFileSync('.git/config', {encoding: 'utf8'})
+    gitConfig = fs.readFileSync('.git/config', 'utf8')
   } catch (e) {
     throw `It can't be done because it's not a git project.`
   }
-  
+
   try {
     projectPath = `${gitConfig}`.split(CONFIG.HOST)[1].split('\n')[0].replace(/(\:|\.git)/g, '')
   } catch (e) {
     throw `No gitlab project found in ${root}`
   }
-  
+
   return projectPath
 }
 
 /**
  * Semver comparator
  * 
- * @param  {any} v1
- * @param  {any} v2
- * @return {-1, 0, 1} Return 0 if v1 == v2, or 1 if v1 is greater, or -1 if v2 is greater. Sorts in ascending order if passed to Array.sort().
+ * @param  {Log} log1
+ * @param  {Log} log2
+ * @return {-1, 0, 1} 
+ *        Return 0 if v1 == v2, 
+ *        or 1 if v1 is greater, 
+ *        or -1 if v2 is greater. 
+ *        Sorts in ascending order if passed to Array.sort().
  */
-function compareVersions(v1, v2) {
-  var _v1 = semver.clean(v1.version)
-  var _v2 = semver.clean(v2.version)
-  
-  if (!_v1 || !_v2) {
+function compareVersions(log1: Log, log2: Log): number {
+  var v1: number = semver.clean(log1.version)
+  var v2: number = semver.clean(log2.version)
+
+  if (!v1 || !v2) {
     return
   }
 
-  return semver.rcompare(_v1, _v2)
+  return semver.rcompare(v1, v2)
 }

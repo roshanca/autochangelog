@@ -19,6 +19,7 @@ const jsonfile = require('jsonfile');
 const request = require('request');
 const semver = require('semver');
 const program = require('commander');
+const ProgressBar = require('progress');
 const CONFIG = {
     FILE: '.changelogrc',
     HOST: 'git.cairenhui.com',
@@ -26,9 +27,9 @@ const CONFIG = {
     OUTPUT: 'CHANGELOG.md'
 };
 const PROMPT = {
-    DESC: 'You have not configed it yet, have you?\n' +
-        'Please to work it out according to the interactive prompt.\n' +
-        'It will creating config file (.changelogrc) in your system automatically.\n\n' +
+    DESC: 'You have not configured it yet, have you?\n' +
+        'Please to work it out with the interactive prompt below.\n' +
+        'It will create a config file (.changelogrc) in your system.\n\n' +
         '(If you have no idea about what token is, find it in your gitlab site by ' +
         'following "Profile Setting" - "Account" - "Reset Private token")\n\n' +
         'Press ^C at any time to quit.\n',
@@ -68,7 +69,6 @@ program
             const issuesApi = `${CONFIG.API}/projects/${encodeURIComponent(projectPath)}/milestones/#{milestoneId}/issues?private_token=${token}`;
             const milestones = yield fetchMilestones(milestonesApi);
             const logs = yield generateLogs(milestones, issuesApi);
-            console.log(`Generating changelog of ${projectPath} to ${CONFIG.OUTPUT}`);
             generateChangeLog(logs);
         }
         catch (e) {
@@ -105,6 +105,7 @@ function createConfigFile() {
             };
             jsonfile.writeFile(configFile, content, (e) => {
                 if (!e) {
+                    console.log('\n');
                     resolve(content);
                 }
                 else {
@@ -115,25 +116,54 @@ function createConfigFile() {
     });
 }
 function fetchMilestones(api) {
-    return new Promise((resolve, reject) => {
+    const promise = new Promise((resolve, reject) => {
         request(api, (e, response, body) => {
             if (!e && response.statusCode === 200) {
                 const milestones = JSON.parse(body);
-                resolve(milestones);
+                if (milestones.length) {
+                    resolve(milestones);
+                }
+                else {
+                    reject('There\'s no milestone yet.');
+                }
             }
             else if (response) {
-                reject(`Unable to fetch milestones because: ${JSON.parse(response.body).message}`);
+                reject(`Unable to fetch milestones because: ${JSON.parse(response.body).message}.`);
             }
             else {
                 reject(e);
             }
+        })
+            .on('response', () => {
+            console.log('Starting to fetch all the milestones of this project.\n');
         });
     });
+    promise.then((response) => {
+        if (response.length > 1) {
+            console.log(`Get ${response.length} milestones totally.\nGetting start to fetch all the issues of these milestones:\n`);
+        }
+        else if (response.length === 1) {
+            console.log('Get only one milestone, fetch the issues of this milestone:\n');
+        }
+    });
+    return promise;
 }
 function generateLogs(milestones, api) {
     return __awaiter(this, void 0, Promise, function* () {
         'use strict';
         let promises = milestones.map((milestone) => generateLog(milestone, api));
+        const barOpts = {
+            complete: '=',
+            incomplete: ' ',
+            width: 20,
+            total: promises.length
+        };
+        const bar = new ProgressBar('  fetching issues [:bar] :percent :elapseds', barOpts);
+        promises.forEach((promise) => {
+            promise.then(() => {
+                bar.tick();
+            });
+        });
         return yield Promise.all(promises);
     });
 }
@@ -165,6 +195,7 @@ function generateLog(milestone, api) {
 }
 function generateChangeLog(logs) {
     'use strict';
+    console.log(`\nGenerating changelog into ${CONFIG.OUTPUT}`);
     logs = logs.sort(compareVersions);
     let body = logs.map((log) => {
         return log.content.join('\n');
@@ -184,7 +215,7 @@ function getProjectPath() {
     let gitConfig;
     let projectPath;
     try {
-        gitConfig = fs.readFileSync('.git/config', { encoding: 'utf8' });
+        gitConfig = fs.readFileSync('.git/config', 'utf8');
     }
     catch (e) {
         throw `It can't be done because it's not a git project.`;
@@ -197,11 +228,11 @@ function getProjectPath() {
     }
     return projectPath;
 }
-function compareVersions(v1, v2) {
-    var _v1 = semver.clean(v1.version);
-    var _v2 = semver.clean(v2.version);
-    if (!_v1 || !_v2) {
+function compareVersions(log1, log2) {
+    var v1 = semver.clean(log1.version);
+    var v2 = semver.clean(log2.version);
+    if (!v1 || !v2) {
         return;
     }
-    return semver.rcompare(_v1, _v2);
+    return semver.rcompare(v1, v2);
 }

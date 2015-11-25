@@ -47,6 +47,7 @@ const jsonfile = require('jsonfile')
 const request = require('request')
 const semver = require('semver')
 const program = require('commander')
+const ProgressBar = require('progress');
 
 /**
  * Default config.
@@ -98,26 +99,26 @@ program
   .version(require('./package').version)
   .parse(process.argv)
 
-;(async function () {
+; (async function() {
   'use strict'
-  
+
   try {
     let config: Config = await getConfing()
-    
+
     if (!config) {
       config = await createConfigFile()
     }
-    
+
     const token: string = config.token
     const projectPath: string = getProjectPath()
-    
-    const milestonesApi: string = `${CONFIG.API}/projects/${encodeURIComponent(projectPath)}/milestones?private_token=${token}`
-    const issuesApi: string = `${CONFIG.API}/projects/${encodeURIComponent(projectPath)}/milestones/#{milestoneId}/issues?private_token=${token}`
-    
+
+    const milestonesApi: string = `${CONFIG.API}/projects/${encodeURIComponent(projectPath) }/milestones?private_token=${token}`
+    const issuesApi: string = `${CONFIG.API}/projects/${encodeURIComponent(projectPath) }/milestones/#{milestoneId}/issues?private_token=${token}`
+
     const milestones: Milestone[] = await fetchMilestones(milestonesApi)
     const logs: Log[] = await generateLogs(milestones, issuesApi)
-    
-    console.log(`Generating changelog of ${projectPath} to ${CONFIG.OUTPUT}`)
+
+    // Generating changelog of current project
     generateChangeLog(logs)
   } catch (e) {
     console.error(e)
@@ -197,6 +198,21 @@ async function generateLogs(milestones: Milestone[], api: string): Promise<Log[]
   'use strict'
   
   let promises: Promise<Log>[] = milestones.map((milestone) => generateLog(milestone, api))
+  
+  const barOpts = {
+    complete: '=',
+    incomplete: ' ',
+    width: 20,
+    total: promises.length
+  }
+  
+  const bar = new ProgressBar('  fetching issues [:bar] :percent :elapseds', barOpts);
+  
+  promises.forEach((promise) => {
+    promise.then(() => {
+      bar.tick()
+    })
+  })
   
   return await Promise.all(promises)
 }

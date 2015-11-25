@@ -178,7 +178,9 @@ function generateLog(milestone, api) {
                 const update = milestone.created_at.substr(0, 10);
                 const issues = JSON.parse(body);
                 let content = issues.map((issue) => {
-                    return `- ${issue.title} (#${issue.iid} @${issue.assignee.username})`;
+                    // handle unassigned issue
+                    let username = issue.assignee && issue.assignee.username ? ` @${issue.assignee.username}` : ''
+                    return `- ${issue.title} (#${issue.iid}${username})`;
                 });
                 content.unshift(`## ${version} - ${update}`);
                 resolve({

@@ -1,12 +1,12 @@
 #!/usr/bin/env node --harmony
 
-interface Config {
+interface IConfig {
   host: string
   api: string
   token: string
 }
 
-interface Milestone {
+interface IMilestone {
   id: number
   iid: number
   project_id: number
@@ -18,7 +18,7 @@ interface Milestone {
   due_date: any
 }
 
-interface Issue {
+interface IIssue {
   id: number
   iid: number
   title: string
@@ -27,12 +27,12 @@ interface Issue {
   created_at: string
   updated_at: string
   labels?: string[]
-  milestone?: Milestone
+  milestone?: IMilestone
   assignee?: any
   author?: any
 }
 
-interface Log {
+interface ILog {
   version: string
   content: string[]
 }
@@ -103,7 +103,7 @@ program
   'use strict'
 
   try {
-    let config: Config = await getConfing()
+    let config: IConfig = await getConfing()
 
     if (!config) {
       config = await createConfigFile()
@@ -112,11 +112,11 @@ program
     const token: string = config.token
     const projectPath: string = getProjectPath()
 
-    const milestonesApi: string = `${CONFIG.API}/projects/${encodeURIComponent(projectPath) }/milestones?private_token=${token}`
-    const issuesApi: string = `${CONFIG.API}/projects/${encodeURIComponent(projectPath) }/milestones/#{milestoneId}/issues?private_token=${token}`
+    const milestonesApi = `${CONFIG.API}/projects/${encodeURIComponent(projectPath) }/milestones?private_token=${token}`
+    const issuesApi = `${CONFIG.API}/projects/${encodeURIComponent(projectPath) }/milestones/#{milestoneId}/issues?private_token=${token}`
 
-    const milestones: Milestone[] = await fetchMilestones(milestonesApi)
-    const logs: Log[] = await generateLogs(milestones, issuesApi)
+    const milestones: IMilestone[] = await fetchMilestones(milestonesApi)
+    const logs: ILog[] = await generateLogs(milestones, issuesApi)
 
     // Generating changelog of current project
     generateChangeLog(logs)
@@ -125,7 +125,7 @@ program
   }
 })()
 
-function getConfing(): Promise<Config> {
+function getConfing(): Promise<IConfig> {
   return new Promise((resolve, reject) => {
     jsonfile.readFile(configFile, (e, data) => {
       if (!e) {
@@ -137,7 +137,7 @@ function getConfing(): Promise<Config> {
   })
 }
 
-function createConfigFile(): Promise<Config> {
+function createConfigFile(): Promise<IConfig> {
   return new Promise((resolve, reject) => {
     console.log(PROMPT.DESC)
 
@@ -149,7 +149,7 @@ function createConfigFile(): Promise<Config> {
         return
       }
 
-      const content: Config = {
+      const content: IConfig = {
         host: result.host,
         api: result.api,
         token: result.token
@@ -174,11 +174,11 @@ function createConfigFile(): Promise<Config> {
  * @example of the api: 
  * http://git.cairenhui.com/api/v3/projects/OOS%2Foos-web-fe/milestones??per_page=30&private_token=Wk9deBZUz9_6gPZbysxj
  */
-function fetchMilestones(api: string): Promise<Milestone[]> {
+function fetchMilestones(api: string): Promise<IMilestone[]> {
   const promise =  new Promise((resolve, reject) => {
     request(api, (e, response, body) => {
       if (!e && response.statusCode === 200) {
-        const milestones: Milestone[] = JSON.parse(body)
+        const milestones: IMilestone[] = JSON.parse(body)
         if (milestones.length) {
           resolve(milestones)
         } else {
@@ -209,13 +209,13 @@ function fetchMilestones(api: string): Promise<Milestone[]> {
 /**
  * * Generating all the logs from milestones and the given api.
  * 
- * @param  {Milestone[]} milestones
+ * @param  {IMilestone[]} milestones
  * @param  {string} api
  */
-async function generateLogs(milestones: Milestone[], api: string): Promise<Log[]> {
+async function generateLogs(milestones: IMilestone[], api: string): Promise<ILog[]> {
   'use strict'
   
-  let promises: Promise<Log>[] = milestones.map((milestone) => generateLog(milestone, api))
+  let promises: Promise<ILog>[] = milestones.map((milestone) => generateLog(milestone, api))
   
   const barOpts = {
     complete: '=',
@@ -238,10 +238,10 @@ async function generateLogs(milestones: Milestone[], api: string): Promise<Log[]
 /**
  * Generatin single log from specific milestone and the given api.
  * 
- * @param  {Milestone} milestone
+ * @param  {IMilestone} milestone
  * @param  {string} api
  */
-function generateLog(milestone: Milestone, api: string): Promise<Log> {
+function generateLog(milestone: IMilestone, api: string): Promise<ILog> {
   return new Promise((resolve, reject) => {
     request(api.replace(/#{milestoneId}/, `${milestone.id}`), (e, response, body) => {
       'use strict'
@@ -249,7 +249,7 @@ function generateLog(milestone: Milestone, api: string): Promise<Log> {
       if (!e && response.statusCode === 200) {
         const version: string = milestone.title
         const update: string = milestone.created_at.substr(0, 10)
-        const issues: Issue[] = JSON.parse(body)
+        const issues: IIssue[] = JSON.parse(body)
 
         let content: string[] = issues.map((issue) => {
           return `- ${issue.title} (#${issue.iid} @${issue.assignee.username})`
@@ -273,9 +273,9 @@ function generateLog(milestone: Milestone, api: string): Promise<Log> {
 /**
  * Write the changelog into the output file.
  * 
- * @param  {Log[]} logs
+ * @param  {ILog[]} logs
  */
-function generateChangeLog(logs: Log[]) {
+function generateChangeLog(logs: ILog[]) {
   'use strict'
   
   console.log(`\nGenerating changelog into ${CONFIG.OUTPUT}`)
@@ -306,7 +306,7 @@ function generateChangeLog(logs: Log[]) {
 function getProjectPath(): string {
   'use strict'
 
-  let gitConfig: Config
+  let gitConfig: IConfig
   let projectPath: string
 
   try {
@@ -327,17 +327,17 @@ function getProjectPath(): string {
 /**
  * Semver comparator
  * 
- * @param  {Log} log1
- * @param  {Log} log2
+ * @param  {ILog} log1
+ * @param  {ILog} log2
  * @return {-1, 0, 1} 
  *        Return 0 if v1 == v2, 
  *        or 1 if v1 is greater, 
  *        or -1 if v2 is greater. 
  *        Sorts in ascending order if passed to Array.sort().
  */
-function compareVersions(log1: Log, log2: Log): number {
-  var v1: number = semver.clean(log1.version)
-  var v2: number = semver.clean(log2.version)
+function compareVersions(log1: ILog, log2: ILog): number {
+  const v1: number = semver.clean(log1.version)
+  const v2: number = semver.clean(log2.version)
 
   if (!v1 || !v2) {
     return

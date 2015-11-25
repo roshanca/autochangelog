@@ -1,6 +1,6 @@
 {
   "name": "autochangelog",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Using Gitlab API to get milestones and issues, generating changelogs automatically.",
   "keywords": [
     "cli",
@@ -22,9 +22,11 @@
     "request": "^2.67.0",
     "semver": "^5.1.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "tslint-stylish": "^2.1.0-beta"
+  },
   "scripts": {
-    "test": "tslint index.ts"
+    "test": "tslint index.ts -s node_modules/tslint-stylish -t stylish"
   },
   "author": {
     "name": "Roshan Wu",

@@ -1,3 +1,8 @@
+## 1.2.0 - 2015-11-25
+- Enhance interactive processing in console.
+- Many phrases and prompt optimized.
+- Interrupt process early before fetching issues when there's no milestone
+
 ## 1.1.0 - 2015-11-23
 - Add type define and imporve error handler.
 

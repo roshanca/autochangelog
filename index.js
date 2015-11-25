@@ -63,10 +63,12 @@ program
             if (!config) {
                 config = yield createConfigFile();
             }
+            const host = config.host;
+            const api = config.api;
             const token = config.token;
-            const projectPath = getProjectPath();
-            const milestonesApi = `${CONFIG.API}/projects/${encodeURIComponent(projectPath)}/milestones?private_token=${token}`;
-            const issuesApi = `${CONFIG.API}/projects/${encodeURIComponent(projectPath)}/milestones/#{milestoneId}/issues?private_token=${token}`;
+            const projectPath = getProjectPath(host);
+            const milestonesApi = `${api}/projects/${encodeURIComponent(projectPath)}/milestones?private_token=${token}`;
+            const issuesApi = `${api}/projects/${encodeURIComponent(projectPath)}/milestones/#{milestoneId}/issues?private_token=${token}`;
             const milestones = yield fetchMilestones(milestonesApi);
             const logs = yield generateLogs(milestones, issuesApi);
             generateChangeLog(logs);
@@ -210,7 +212,7 @@ function generateChangeLog(logs) {
         }
     });
 }
-function getProjectPath() {
+function getProjectPath(host) {
     'use strict';
     let gitConfig;
     let projectPath;
@@ -221,7 +223,7 @@ function getProjectPath() {
         throw `It can't be done because it's not a git project.`;
     }
     try {
-        projectPath = `${gitConfig}`.split(CONFIG.HOST)[1].split('\n')[0].replace(/(\:|\.git)/g, '');
+        projectPath = `${gitConfig}`.split(host)[1].split('\n')[0].replace(/(\:|\.git)/g, '');
     }
     catch (e) {
         throw `No gitlab project found in ${root}`;
@@ -229,8 +231,8 @@ function getProjectPath() {
     return projectPath;
 }
 function compareVersions(log1, log2) {
-    var v1 = semver.clean(log1.version);
-    var v2 = semver.clean(log2.version);
+    const v1 = semver.clean(log1.version);
+    const v2 = semver.clean(log2.version);
     if (!v1 || !v2) {
         return;
     }

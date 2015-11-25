@@ -109,11 +109,13 @@ program
       config = await createConfigFile()
     }
 
-    const token: string = config.token
-    const projectPath: string = getProjectPath()
+    const host = config.host
+    const api = config.api
+    const token = config.token
+    const projectPath = getProjectPath(host)
 
-    const milestonesApi = `${CONFIG.API}/projects/${encodeURIComponent(projectPath) }/milestones?private_token=${token}`
-    const issuesApi = `${CONFIG.API}/projects/${encodeURIComponent(projectPath) }/milestones/#{milestoneId}/issues?private_token=${token}`
+    const milestonesApi = `${api}/projects/${encodeURIComponent(projectPath)}/milestones?private_token=${token}`
+    const issuesApi = `${api}/projects/${encodeURIComponent(projectPath)}/milestones/#{milestoneId}/issues?private_token=${token}`
 
     const milestones: IMilestone[] = await fetchMilestones(milestonesApi)
     const logs: ILog[] = await generateLogs(milestones, issuesApi)
@@ -301,9 +303,10 @@ function generateChangeLog(logs: ILog[]) {
 /**
  * Get the full path of the current project.
  * 
- * @return  {string} projectPath
+ * @param  {string} host
+ * @return {string} projectPath
  */
-function getProjectPath(): string {
+function getProjectPath(host: string): string {
   'use strict'
 
   let gitConfig: IConfig
@@ -316,7 +319,7 @@ function getProjectPath(): string {
   }
 
   try {
-    projectPath = `${gitConfig}`.split(CONFIG.HOST)[1].split('\n')[0].replace(/(\:|\.git)/g, '')
+    projectPath = `${gitConfig}`.split(host)[1].split('\n')[0].replace(/(\:|\.git)/g, '')
   } catch (e) {
     throw `No gitlab project found in ${root}`
   }

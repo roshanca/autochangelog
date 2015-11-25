@@ -4,5 +4,12 @@
   "ref": "master",
   "path": "typings",
   "bundle": "typings/tsd.d.ts",
-  "installed": {}
+  "installed": {
+    "semver/semver.d.ts": {
+      "commit": "b2d17b5dad042e293e77d09f2a30d281325cb606"
+    },
+    "node/node.d.ts": {
+      "commit": "b2d17b5dad042e293e77d09f2a30d281325cb606"
+    }
+  }
 }

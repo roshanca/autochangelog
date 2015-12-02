@@ -1,6 +1,6 @@
 {
   "name": "autochangelog",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Using Gitlab API to get milestones and issues, generating changelogs automatically.",
   "keywords": [
     "cli",

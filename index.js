@@ -178,9 +178,19 @@ function generateLog(milestone, api) {
                 const update = milestone.created_at.substr(0, 10);
                 const issues = JSON.parse(body);
                 let content = issues.map((issue) => {
-                    return `- ${issue.title} (#${issue.iid} @${issue.assignee.username})`;
+                    if (issue.assignee && issue.assignee.username) {
+                        return `- ${issue.title} (#${issue.iid} @${issue.assignee.username})`;
+                    }
+                    else {
+                        return `- ${issue.title} (#${issue.iid})`;
+                    }
                 });
-                content.unshift(`## ${version} - ${update}`);
+                if (milestone.state !== 'closed') {
+                    content.unshift(`## ${version}(unreleased)`);
+                }
+                else {
+                    content.unshift(`## ${version} - ${update}`);
+                }
                 resolve({
                     version: version,
                     content: content

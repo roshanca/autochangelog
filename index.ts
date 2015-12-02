@@ -254,10 +254,18 @@ function generateLog(milestone: IMilestone, api: string): Promise<ILog> {
         const issues: IIssue[] = JSON.parse(body)
 
         let content: string[] = issues.map((issue) => {
-          return `- ${issue.title} (#${issue.iid} @${issue.assignee.username})`
+          if (issue.assignee && issue.assignee.username) {
+            return `- ${issue.title} (#${issue.iid} @${issue.assignee.username})`
+          } else {
+            return `- ${issue.title} (#${issue.iid})`
+          }
         })
 
-        content.unshift(`## ${version} - ${update}`)
+        if (milestone.state !== 'closed') {
+          content.unshift(`## ${version}(unreleased)`)
+        } else {
+          content.unshift(`## ${version} - ${update}`)
+        }
 
         resolve({
           version: version,

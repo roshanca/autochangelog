@@ -3,11 +3,12 @@
   "version": "1.2.3",
   "description": "Using Gitlab API to get milestones and issues, generating changelogs automatically.",
   "keywords": [
+    "gitlab",
     "cli",
     "changelog"
   ],
   "engines": {
-    "node": ">= 0.10.0"
+    "node": ">= 4.2.0"
   },
   "bin": {
     "autochangelog": "./index.js"
@@ -23,10 +24,12 @@
     "semver": "^5.1.0"
   },
   "devDependencies": {
-    "tslint-stylish": "^2.1.0-beta"
+    "tslint": "^3.11.0",
+    "tslint-stylish": "^2.1.0-beta",
+    "typescript": "^1.8.10"
   },
   "scripts": {
-    "test": "tslint index.ts -s node_modules/tslint-stylish -t stylish"
+    "test": "node_modules/.bin/tslint index.ts -s node_modules/tslint-stylish -t stylish"
   },
   "author": {
     "name": "Roshan Wu",

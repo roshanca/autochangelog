@@ -24,17 +24,9 @@
         "variable-declaration": "nospace"
       }
     ],
-    "next-line": [
-      true,
-      "check-catch",
-      "check-else"
-    ],
     "no-var-keyword": true,
     "no-internal-module": true,
     "no-inferrable-types": true,
-    "no-null": true,
-    "boolean-trivia": true,
-    "type-operator-spacing": true,
     "curly": true,
     "eofline": true,
     "forin": true,
@@ -50,7 +42,6 @@
       true,
       "single"
     ],
-    "semicolon": false,
-    "prefer-const": true
+    "semicolon": false
   }
 }

@@ -133,7 +133,7 @@ function getConfig(): Promise<IConfig> {
       if (!e) {
         resolve(data)
       } else {
-        resolve(false)
+        reject(e)
       }
     })
   })
@@ -177,7 +177,7 @@ function createConfigFile(): Promise<IConfig> {
  * http://git.cairenhui.com/api/v3/projects/OOS%2Foos-web-fe/milestones??per_page=30&private_token=Wk9deBZUz9_6gPZbysxj
  */
 function fetchMilestones(api: string): Promise<IMilestone[]> {
-  const promise =  new Promise((resolve, reject) => {
+  const promise =  new Promise<IMilestone[]>((resolve, reject) => {
     request(api, (e, response, body) => {
       if (!e && response.statusCode === 200) {
         const milestones: IMilestone[] = JSON.parse(body)

@@ -51,7 +51,7 @@ const PROMPT = {
     ]
 };
 const root = process.cwd();
-const configFile = path.resolve(process.env.HOME, CONFIG.FILE);
+const configFile = path.resolve(process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'], CONFIG.FILE);
 program
     .version(require('./package').version)
     .parse(process.argv);

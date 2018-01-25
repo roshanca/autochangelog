@@ -92,7 +92,7 @@ const PROMPT = {
 const root: string = process.cwd()
 
 // config file: ~/.changelogrc
-const configFile: string = path.resolve(process.env.HOME, CONFIG.FILE);
+const configFile: string = path.resolve(process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'], CONFIG.FILE);
 
 // CLI control
 program

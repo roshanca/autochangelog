@@ -103,7 +103,7 @@ program
   'use strict'
 
   try {
-    let config: IConfig = await getConfing()
+    let config: IConfig = await getConfig()
 
     if (!config) {
       config = await createConfigFile()
@@ -127,7 +127,7 @@ program
   }
 })()
 
-function getConfing(): Promise<IConfig> {
+function getConfig(): Promise<IConfig> {
   return new Promise((resolve, reject) => {
     jsonfile.readFile(configFile, (e, data) => {
       if (!e) {

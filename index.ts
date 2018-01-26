@@ -92,7 +92,7 @@ const PROMPT = {
 const root: string = process.cwd()
 
 // config file: ~/.changelogrc
-const configFile: string = path.resolve(process.env.HOME, CONFIG.FILE);
+const configFile: string = path.resolve(process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'], CONFIG.FILE);
 
 // CLI control
 program
@@ -103,7 +103,7 @@ program
   'use strict'
 
   try {
-    let config: IConfig = await getConfing()
+    let config: IConfig = await getConfig()
 
     if (!config) {
       config = await createConfigFile()
@@ -127,13 +127,13 @@ program
   }
 })()
 
-function getConfing(): Promise<IConfig> {
+function getConfig(): Promise<IConfig> {
   return new Promise((resolve, reject) => {
     jsonfile.readFile(configFile, (e, data) => {
       if (!e) {
         resolve(data)
       } else {
-        resolve(false)
+        reject(e)
       }
     })
   })
@@ -177,7 +177,7 @@ function createConfigFile(): Promise<IConfig> {
  * http://git.cairenhui.com/api/v3/projects/OOS%2Foos-web-fe/milestones??per_page=30&private_token=Wk9deBZUz9_6gPZbysxj
  */
 function fetchMilestones(api: string): Promise<IMilestone[]> {
-  const promise =  new Promise((resolve, reject) => {
+  const promise =  new Promise<IMilestone[]>((resolve, reject) => {
     request(api, (e, response, body) => {
       if (!e && response.statusCode === 200) {
         const milestones: IMilestone[] = JSON.parse(body)

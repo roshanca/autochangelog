@@ -1,4 +1,4 @@
-#!/usr/bin/env node --harmony
+#!/usr/bin/env node
 
 interface IConfig {
   host: string
@@ -40,35 +40,36 @@ interface ILog {
 /**
  * Module dependencies.
  */
-const fs = require('fs');
+const fs = require('fs')
 const path = require('path')
 const _prompt = require('prompt')
 const jsonfile = require('jsonfile')
 const request = require('request')
 const semver = require('semver')
 const program = require('commander')
-const ProgressBar = require('progress');
+const ProgressBar = require('progress')
 
 /**
  * Default config.
  */
 const CONFIG = {
   FILE: '.changelogrc',
-  HOST: 'git.cairenhui.com',
-  API: 'http://git.cairenhui.com/api/v3',
+  HOST: 'gitlab.mogujie.org/',
+  API: 'http://gitlab.mogujie.org/api/v3',
   OUTPUT: 'CHANGELOG.md'
 }
 
 const PROMPT = {
-  
   // description display at the top of console when prompting
-  DESC: 'You have not configured it yet, have you?\n' +
-  'Please to work it out with the interactive prompt below.\n' +
-  'It will create a config file (.changelogrc) in your system.\n\n' +
-  '(If you have no idea about what token is, find it in your gitlab site by ' +
-  'following "Profile Setting" - "Account" - "Reset Private token")\n\n' +
-  'Press ^C at any time to quit.\n',
-      
+  DESC: `You have not configured it yet, have you?
+Please to work it out with the interactive prompt below.
+It will create a config file (.changelogrc) in your system.
+
+(If you have no idea about what token is, find it in your gitlab site by following "Profile Setting" - "Account" - "Reset Private token")
+
+Press ^C at any time to quit.
+`,
+
   // options for prompt
   OPTIONS: [
     {
@@ -92,30 +93,33 @@ const PROMPT = {
 const root: string = process.cwd()
 
 // config file: ~/.changelogrc
-const configFile: string = path.resolve(process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'], CONFIG.FILE);
+const configFileLocation: string = path.resolve(
+  process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'],
+  CONFIG.FILE
+)
 
 // CLI control
-program
-  .version(require('./package').version)
-  .parse(process.argv)
+program.version(require(`${root}/package`).version).parse(process.argv)
+main()
 
-; (async function() {
-  'use strict'
-
+// Main logic
+async function main() {
   try {
-    let config: IConfig = await getConfig()
+    let config: IConfig
 
-    if (!config) {
+    if (fsExistsSync(configFileLocation)) {
+      config = await getConfig()
+    } else {
       config = await createConfigFile()
     }
 
-    const host = config.host
-    const api = config.api
-    const token = config.token
+    const { host, api, token } = config
     const projectPath = getProjectPath(host)
+    const encodeProjectPath = encodeURIComponent(projectPath)
+    const tokenQuery = `private_token=${token}`
 
-    const milestonesApi = `${api}/projects/${encodeURIComponent(projectPath)}/milestones?private_token=${token}`
-    const issuesApi = `${api}/projects/${encodeURIComponent(projectPath)}/milestones/#{milestoneId}/issues?private_token=${token}`
+    const milestonesApi = `${api}/projects/${encodeProjectPath}/milestones?${tokenQuery}`
+    const issuesApi = `${api}/projects/${encodeProjectPath}/milestones/#{milestoneId}/issues?${tokenQuery}`
 
     const milestones: IMilestone[] = await fetchMilestones(milestonesApi)
     const logs: ILog[] = await generateLogs(milestones, issuesApi)
@@ -125,11 +129,24 @@ program
   } catch (e) {
     console.error(e)
   }
-})()
+}
+
+/**
+ * Check weather file or directory exists on specific path
+ * @param path
+ */
+function fsExistsSync(path) {
+  try {
+    fs.accessSync(path, fs.F_OK)
+  } catch (e) {
+    return false
+  }
+  return true
+}
 
 function getConfig(): Promise<IConfig> {
   return new Promise((resolve, reject) => {
-    jsonfile.readFile(configFile, (e, data) => {
+    jsonfile.readFile(configFileLocation, (e, data) => {
       if (!e) {
         resolve(data)
       } else {
@@ -143,8 +160,8 @@ function createConfigFile(): Promise<IConfig> {
   return new Promise((resolve, reject) => {
     console.log(PROMPT.DESC)
 
-    _prompt.message = 'Enter';
-    _prompt.start();
+    _prompt.message = 'Enter'
+    _prompt.start()
     _prompt.get(PROMPT.OPTIONS, (e, result) => {
       if (e) {
         reject(`\n${e}`)
@@ -155,151 +172,171 @@ function createConfigFile(): Promise<IConfig> {
         host: result.host,
         api: result.api,
         token: result.token
-      };
+      }
 
-      jsonfile.writeFile(configFile, content, (e) => {
+      jsonfile.writeFile(configFileLocation, content, e => {
         if (!e) {
           console.log('\n')
           resolve(content)
         } else {
-          reject(`Unable to write file: ${configFile}`)
+          reject(`Unable to write file: ${configFileLocation}`)
         }
       })
-    });
+    })
   })
 }
 
 /**
  * Fetch all the milestones from the given api.
- * 
+ *
  * @param  {string} api
- * @example of the api: 
- * http://git.cairenhui.com/api/v3/projects/OOS%2Foos-web-fe/milestones??per_page=30&private_token=Wk9deBZUz9_6gPZbysxj
+ * @example of the api:
+ * http://gitlab.mogujie.org/api/v3/projects/wxa%2Fwxa-module/milestones??per_page=10&private_token=xxx
  */
 function fetchMilestones(api: string): Promise<IMilestone[]> {
-  const promise =  new Promise<IMilestone[]>((resolve, reject) => {
+  const promise = new Promise<IMilestone[]>((resolve, reject) => {
     request(api, (e, response, body) => {
       if (!e && response.statusCode === 200) {
         const milestones: IMilestone[] = JSON.parse(body)
         if (milestones.length) {
           resolve(milestones)
         } else {
-          reject('There\'s no milestone yet.')
+          reject(`There's no milestone yet.`)
         }
       } else if (response) {
-        reject(`Unable to fetch milestones because: ${JSON.parse(response.body).message}.`)
+        reject(
+          `Unable to fetch milestones because: ${
+            JSON.parse(response.body).message
+          }.`
+        )
       } else {
         reject(e)
       }
-    })
-    .on('response', () => {
+    }).on('response', () => {
       console.log('Starting to fetch all the milestones of this project.\n')
     })
   })
-  
+
   promise.then((response: Object[]) => {
     if (response.length > 1) {
-      console.log(`Get ${response.length} milestones totally.\nGetting start to fetch all the issues of these milestones:\n`)
+      console.log(
+        `Get ${
+          response.length
+        } milestones totally.\nGetting start to fetch all the issues of these milestones:\n`
+      )
     } else if (response.length === 1) {
-      console.log('Get only one milestone, fetch the issues of this milestone:\n')
+      console.log(
+        'Get only one milestone, fetch the issues of this milestone:\n'
+      )
     }
   })
-  
+
   return promise
 }
 
 /**
  * * Generating all the logs from milestones and the given api.
- * 
+ *
  * @param  {IMilestone[]} milestones
  * @param  {string} api
  */
-async function generateLogs(milestones: IMilestone[], api: string): Promise<ILog[]> {
-  'use strict'
-  
-  let promises: Promise<ILog>[] = milestones.map((milestone) => generateLog(milestone, api))
-  
+async function generateLogs(
+  milestones: IMilestone[],
+  api: string
+): Promise<ILog[]> {
+  let promises: Promise<ILog>[] = milestones.map(milestone =>
+    generateLog(milestone, api)
+  )
+
   const barOpts = {
     complete: '=',
     incomplete: ' ',
     width: 20,
     total: promises.length
   }
-  
-  const bar = new ProgressBar('  fetching issues [:bar] :percent :elapseds', barOpts);
-  
-  promises.forEach((promise) => {
+
+  const bar = new ProgressBar(
+    '  fetching issues [:bar] :percent :elapseds',
+    barOpts
+  )
+
+  promises.forEach(promise => {
     promise.then(() => {
       bar.tick()
     })
   })
-  
+
   return await Promise.all(promises)
 }
 
 /**
  * Generatin single log from specific milestone and the given api.
- * 
+ *
  * @param  {IMilestone} milestone
  * @param  {string} api
  */
 function generateLog(milestone: IMilestone, api: string): Promise<ILog> {
   return new Promise((resolve, reject) => {
-    request(api.replace(/#{milestoneId}/, `${milestone.id}`), (e, response, body) => {
-      'use strict'
+    request(
+      api.replace(/#{milestoneId}/, `${milestone.id}`),
+      (e, response, body) => {
+        if (!e && response.statusCode === 200) {
+          const version: string = milestone.title
+          const update: string = milestone.created_at.substr(0, 10)
+          const issues: IIssue[] = JSON.parse(body)
 
-      if (!e && response.statusCode === 200) {
-        const version: string = milestone.title
-        const update: string = milestone.created_at.substr(0, 10)
-        const issues: IIssue[] = JSON.parse(body)
+          let content: string[] = issues.map(issue => {
+            if (issue.assignee && issue.assignee.username) {
+              return `- ${issue.title} (#${issue.iid} @${
+                issue.assignee.username
+              })`
+            } else {
+              return `- ${issue.title} (#${issue.iid})`
+            }
+          })
 
-        let content: string[] = issues.map((issue) => {
-          if (issue.assignee && issue.assignee.username) {
-            return `- ${issue.title} (#${issue.iid} @${issue.assignee.username})`
+          if (milestone.state !== 'closed') {
+            content.unshift(`## ${version}(unreleased)`)
           } else {
-            return `- ${issue.title} (#${issue.iid})`
+            content.unshift(`## ${version} - ${update}`)
           }
-        })
 
-        if (milestone.state !== 'closed') {
-          content.unshift(`## ${version}(unreleased)`)
+          resolve({
+            version: version,
+            content: content
+          })
+        } else if (response) {
+          reject(
+            `Unable to fetch issues of ${milestone.id} milestone because: ${
+              JSON.parse(response.body).message
+            }`
+          )
         } else {
-          content.unshift(`## ${version} - ${update}`)
+          reject(e)
         }
-
-        resolve({
-          version: version,
-          content: content
-        })
-      } else if (response) {
-        reject(`Unable to fetch issues of ${milestone.id} milestone because: ${JSON.parse(response.body).message}`)
-      } else {
-        reject(e)
       }
-    })
+    )
   })
 }
 
 /**
  * Write the changelog into the output file.
- * 
+ *
  * @param  {ILog[]} logs
  */
 function generateChangeLog(logs: ILog[]) {
-  'use strict'
-  
   console.log(`\nGenerating changelog into ${CONFIG.OUTPUT}`)
-  
+
   logs = logs.sort(compareVersions)
   // console.log(logs)
-  
-  let body: any = logs.map((log) => {
+
+  let body: any = logs.map(log => {
     return log.content.join('\n')
   })
-  
+
   // console.log(body)
   body = body.join('\n\n')
-  fs.writeFile(CONFIG.OUTPUT, body, (e) => {
+  fs.writeFile(CONFIG.OUTPUT, body, e => {
     if (!e) {
       console.log(`\nOK, ${CONFIG.OUTPUT} generated successfully!`)
     } else {
@@ -310,13 +347,11 @@ function generateChangeLog(logs: ILog[]) {
 
 /**
  * Get the full path of the current project.
- * 
+ *
  * @param  {string} host
  * @return {string} projectPath
  */
 function getProjectPath(host: string): string {
-  'use strict'
-
   let gitConfig: IConfig
   let projectPath: string
 
@@ -327,7 +362,10 @@ function getProjectPath(host: string): string {
   }
 
   try {
-    projectPath = `${gitConfig}`.split(host)[1].split('\n')[0].replace(/(\:|\.git)/g, '')
+    projectPath = `${gitConfig}`
+      .split(host)[1]
+      .split('\n')[0]
+      .replace(/(\:|\.git)/g, '')
   } catch (e) {
     throw `No gitlab project found in ${root}`
   }
@@ -337,13 +375,13 @@ function getProjectPath(host: string): string {
 
 /**
  * Semver comparator
- * 
+ *
  * @param  {ILog} log1
  * @param  {ILog} log2
- * @return {-1, 0, 1} 
- *        Return 0 if v1 == v2, 
- *        or 1 if v1 is greater, 
- *        or -1 if v2 is greater. 
+ * @return {-1, 0, 1}
+ *        Return 0 if v1 == v2,
+ *        or 1 if v1 is greater,
+ *        or -1 if v2 is greater.
  *        Sorts in ascending order if passed to Array.sort().
  */
 function compareVersions(log1: ILog, log2: ILog): number {

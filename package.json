@@ -1,7 +1,7 @@
 {
   "name": "autochangelog",
   "version": "2.0.0",
-  "description": "Using Gitlab API to get milestones and issues, generating changelogs automatically.",
+  "description": "Using Gitlab API to get milestones and issues, or using local tags, generating changelogs automatically.",
   "keywords": [
     "gitlab",
     "cli",
@@ -15,7 +15,6 @@
   },
   "preferGlobal": true,
   "main": "lib/index.js",
-  "jsnext:main": "lib.es/index.js",
   "dependencies": {
     "commander": "^2.13.0",
     "jsonfile": "^4.0.0",
@@ -25,14 +24,17 @@
     "semver": "^5.5.0"
   },
   "devDependencies": {
-    "@types/node": "^9.3.0",
+    "@types/node": "^9.4.2",
+    "@types/semver": "^5.5.0",
     "tslint": "^5.9.1",
     "tslint-stylish": "^2.1.0",
-    "typescript": "^2.6.2"
+    "typescript": "^2.7.1"
   },
   "scripts": {
+    "test": "npm run lint",
     "lint": "tslint index.ts -s node_modules/tslint-stylish -t stylish",
-    "build": "tsc --outDir lib --module commonjs && tsc --outDir lib.es --module es6",
+    "start": "tsc --outDir lib --module commonjs --watch",
+    "build": "tsc --outDir lib --module commonjs",
     "prepublish": "npm run build"
   },
   "author": {

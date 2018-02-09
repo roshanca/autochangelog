@@ -1,35 +1,41 @@
 {
   "name": "autochangelog",
-  "version": "1.2.3",
-  "description": "Using Gitlab API to get milestones and issues, generating changelogs automatically.",
+  "version": "2.0.0",
+  "description": "Using Gitlab API to get milestones and issues, or using local tags, generating changelogs automatically.",
   "keywords": [
     "gitlab",
     "cli",
     "changelog"
   ],
   "engines": {
-    "node": ">= 4.2.0"
+    "node": ">= 6.0.0"
   },
   "bin": {
-    "autochangelog": "./index.js"
+    "autochangelog": "lib/index.js"
   },
   "preferGlobal": true,
-  "main": "index.js",
+  "main": "lib/index.js",
   "dependencies": {
-    "commander": "^2.9.0",
-    "jsonfile": "^2.2.3",
-    "progress": "^1.1.8",
-    "prompt": "^0.2.14",
-    "request": "^2.67.0",
-    "semver": "^5.1.0"
+    "commander": "^2.13.0",
+    "jsonfile": "^4.0.0",
+    "progress": "^2.0.0",
+    "prompt": "^1.0.0",
+    "request": "^2.83.0",
+    "semver": "^5.5.0"
   },
   "devDependencies": {
-    "tslint": "^3.11.0",
-    "tslint-stylish": "^2.1.0-beta",
-    "typescript": "^2.6.2"
+    "@types/node": "^9.4.2",
+    "@types/semver": "^5.5.0",
+    "tslint": "^5.9.1",
+    "tslint-stylish": "^2.1.0",
+    "typescript": "^2.7.1"
   },
   "scripts": {
-    "test": "node_modules/.bin/tslint index.ts -s node_modules/tslint-stylish -t stylish"
+    "test": "npm run lint",
+    "lint": "tslint index.ts -s node_modules/tslint-stylish -t stylish",
+    "start": "tsc --outDir lib --module commonjs --watch",
+    "build": "tsc --outDir lib --module commonjs",
+    "prepublish": "npm run build"
   },
   "author": {
     "name": "Roshan Wu",

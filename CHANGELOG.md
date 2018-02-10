@@ -1,3 +1,9 @@
+## 2.0.1 - 2017-2-10
+- Fixed version was not correct when parsing
+
+## 2.0.0 - 2017-2-9
+- Generating changelogs from commit messages between tags
+
 ## 1.2.0 - 2015-11-25
 - Enhance interactive processing in console.
 - Many phrases and prompt optimized.

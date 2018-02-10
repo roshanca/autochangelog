@@ -1,7 +1,7 @@
 {
   "name": "autochangelog",
   "version": "2.0.0",
-  "description": "Using Gitlab API to get milestones and issues, or using local tags, generating changelogs automatically.",
+  "description": "Generating changelogs automatically.",
   "keywords": [
     "gitlab",
     "cli",
@@ -16,7 +16,7 @@
   "preferGlobal": true,
   "main": "lib/index.js",
   "dependencies": {
-    "commander": "^2.13.0",
+    "commander": "^2.14.1",
     "jsonfile": "^4.0.0",
     "progress": "^2.0.0",
     "prompt": "^1.0.0",
@@ -24,7 +24,7 @@
     "semver": "^5.5.0"
   },
   "devDependencies": {
-    "@types/node": "^9.4.2",
+    "@types/node": "^9.4.4",
     "@types/semver": "^5.5.0",
     "tslint": "^5.9.1",
     "tslint-stylish": "^2.1.0",

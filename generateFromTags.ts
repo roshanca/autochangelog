@@ -14,6 +14,9 @@ export default function main() {
     : `${root}/History.md`
 
   const compare = (v1, v2) => {
+    v1 = clean(v1)
+    v2 = clean(v2)
+
     if (!v1 || !v2) {
       return
     }

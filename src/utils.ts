@@ -30,3 +30,18 @@ export const fsExistsSync = (path: PathLike) => {
   }
   return true
 }
+
+/**
+ * Clean a tag name to be a valid semver if possible
+ * @param tag
+ * @example cleanTag('v3.1.4.550-123') -> '3.1.4'
+ */
+export const cleanTag = (tag: string) => {
+  let ret = /\d+\.\d+\.\d+/g.exec(tag)
+
+  if (ret !== null) {
+    return ret[0]
+  }
+
+  return ''
+}

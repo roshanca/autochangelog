@@ -1,9 +1,9 @@
 import { readdirSync } from 'fs'
-import * as semver from 'semver-compare'
+import { default as cmp } from 'semver-compare'
 import { parseCommit } from './commit'
 import { makeHistory } from './history'
 import { getRemoteLink } from './remote'
-import { fsExistsSync, getExecResult } from './utils'
+import { fsExistsSync, getExecResult, cleanTag } from './utils'
 import { ERR_MSG } from './constant'
 
 // absolute path of current project
@@ -13,6 +13,17 @@ const gitTagDir = `${gitDir}/refs/tags`
 let gitTags: string[]
 let versions: IVersion[] = []
 let logs: string[] = []
+
+const compare = (tag1: string, tag2: string) => {
+  tag1 = cleanTag(tag1)
+  tag2 = cleanTag(tag2)
+
+  if (!tag1 || !tag2) {
+    return 0
+  }
+
+  return cmp(tag1, tag2)
+}
 
 export const generateBaseTags = (options: Partial<IOption>) => {
   if (!fsExistsSync(gitTagDir)) {
@@ -28,8 +39,11 @@ export const generateBaseTags = (options: Partial<IOption>) => {
     throw ERR_MSG.NO_TAG
   }
 
+  // uniq
+  gitTags = [...new Set(gitTags)]
+
   // descending sort
-  gitTags = gitTags.sort(semver.cmp).reverse()
+  gitTags = gitTags.sort(compare).reverse()
 
   try {
     const firstTag = gitTags[gitTags.length - 1]

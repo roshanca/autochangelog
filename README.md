@@ -43,6 +43,14 @@ Options:
   -h, --help                   output usage information
 ```
 
+## Happy with AutoChangeLog?
+
+Add the badge to your README using the following markdown:
+
+```
+[![autochangelog happy](https://img.shields.io/badge/autochangelog-happy-yellow.svg?style=flat-square)](https://github.com/roshanca/autochangelog)
+```
+
 ## License
 
 MIT license (© 2020 Roshan Wu)

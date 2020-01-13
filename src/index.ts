@@ -39,7 +39,7 @@ program
   .parse(process.argv)
 
 // main process
-const logs = generateBaseTags({
+const logContent = generateBaseTags({
   showDate: program.date,
   useGroup: program.group,
   useFilter: program.filter,
@@ -48,7 +48,7 @@ const logs = generateBaseTags({
 })
 
 // wirte logs into CHANGELOG file
-writeFileSync(`${process.cwd()}/${program.output}`, logs.join('\n'))
+writeFileSync(`${process.cwd()}/${program.output}`, logContent)
 
 const timeSpent = performance.now() - startTime
 console.log(`✨  ChangeLog was generated in ${(timeSpent / 1000).toFixed(3)}s.`)

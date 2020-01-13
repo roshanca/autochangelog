@@ -1,8 +1,12 @@
 import * as configParser from 'parse-git-config'
-import { REMOTE_PATH_DEF } from './constant'
+import { REMOTE_PATH_DEF, ERR_MSG } from './constant'
 
 // convert git config into JSON
 const gitConfig = configParser.sync()
+
+if (!gitConfig['remote "origin"']) {
+  throw ERR_MSG.NO_GIT
+}
 
 // get url of git remote
 const url: string = gitConfig['remote "origin"'].url

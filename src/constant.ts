@@ -1,15 +1,15 @@
-export const DEFAULT_OPTIONS: Record<string, any> = {
+export const DEFAULT_OPTIONS = {
   OUTPUT: 'CHANGELOG.md',
   COMMIT_LIMIT: 5,
   VERSION_LIMIT: 20
 }
 
-export const ERR_MSG: Record<string, string> = {
+export const ERR_MSG = {
   NO_GIT: `It can't be done because this is not a git project.`,
   NO_TAG: 'Please create some tags first.'
 }
 
-export const REMOTE_PATH_DEF: Record<string, string[]> = {
+export const REMOTE_PATH_DEF = {
   GITHUB: ['commit', 'issues', 'pull', 'compare'],
   GITLAB: ['commit', 'issues', 'merge_requests', 'compare'],
   BITBUCKET: ['commits', 'issues', 'pull-requests', 'compare']

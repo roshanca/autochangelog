@@ -9,6 +9,8 @@
 
 A very lightweight command line tool for generating a changelog from git tags and commit history.
 
+[![autochangelog](https://nodei.co/npm/autochangelog.png?downloads=true 'autochangelog')](https://nodei.co/npm/autochangelog)
+
 ## Installation
 
 ```

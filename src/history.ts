@@ -1,35 +1,21 @@
 import { getRemoteLink } from './remote'
 import { GROUP_MAP } from './constant'
 
+let breakingChanges: string[] = []
+
 /**
- * Generate commit history of version in markdown format
+ * Generate commit history in markdown format
  * @param commits
  * @param useGroup
  */
 export const makeHistory = (commits: ICommit[], useGroup: boolean = false) => {
-  let history = ''
-  let breakingChanges: string[] = []
-
-  if (useGroup) {
-    history = groupHistory(commits).join('\n')
-  } else {
-    commits.forEach(commit => {
-      extractLabels(commit)
-      const { hash, shortHash, subject, breakingChange } = commit
-
-      if (breakingChange) {
-        breakingChanges.push(breakingChange)
-      }
-
-      history += `- ${subject} [\`${shortHash}\`](${getRemoteLink().commitLink}/${hash})\n`
-    })
-  }
+  let history = useGroup ? makeGroupHistory(commits) : makePlainHistory(commits)
 
   if (breakingChanges.length) {
-    history += `### BREAKING CHANGES\n`
+    history += `\n\n### BREAKING CHANGES`
 
     breakingChanges.forEach(breakingChange => {
-      history += `- ${breakingChange}\n`
+      history += `\n- ${breakingChange}`
     })
   }
 
@@ -37,10 +23,11 @@ export const makeHistory = (commits: ICommit[], useGroup: boolean = false) => {
 }
 
 /**
- * Group the commits by Conventional Commits guidelines
+ * Group the commits by Conventional Commits guidelines, then
+ * output history content by group
  * @param commits
  */
-const groupHistory = (commits: ICommit[]) => {
+const makeGroupHistory = (commits: ICommit[]) => {
   let groupCommits: string[] = []
 
   for (let group in GROUP_MAP) {
@@ -49,19 +36,44 @@ const groupHistory = (commits: ICommit[]) => {
     )
 
     if (targetGroup.length) {
-      groupCommits.push(`### ${group}\n`)
+      groupCommits.push(`\n### ${group}`)
       targetGroup.forEach(commit => {
         extractLabels(commit)
-        const { hash, shortHash, pureSubject } = commit
+        const { hash, shortHash, pureSubject, breakingChange } = commit
+
+        if (breakingChange) {
+          breakingChanges.push(breakingChange)
+        }
 
         groupCommits.push(
-          `- ${pureSubject} [\`${shortHash}\`](${getRemoteLink().commitLink}/${hash})\n`
+          `- ${pureSubject} [\`${shortHash}\`](${getRemoteLink().commitLink}/${hash})`
         )
       })
     }
   }
 
-  return groupCommits
+  return groupCommits.join('\n')
+}
+
+/**
+ * Output history content flatly
+ * @param commits
+ */
+const makePlainHistory = (commits: ICommit[]) => {
+  let plainHistory = ''
+
+  commits.forEach(commit => {
+    extractLabels(commit)
+    const { hash, shortHash, subject, breakingChange } = commit
+
+    if (breakingChange) {
+      breakingChanges.push(breakingChange)
+    }
+
+    plainHistory += `\n- ${subject} [\`${shortHash}\`](${getRemoteLink().commitLink}/${hash})`
+  })
+
+  return plainHistory
 }
 
 /**

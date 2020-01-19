@@ -52,3 +52,5 @@ export const getRemoteLink = () => {
     compareLink: `${remoteUrl}/${getRemotePath(3)}`
   }
 }
+
+export const getRemoteUrl = () => remoteUrl

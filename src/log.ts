@@ -2,7 +2,7 @@ import { readdirSync } from 'fs'
 import { default as cmp } from 'semver-compare'
 import { parseCommit } from './commit'
 import { makeHistory } from './history'
-import { getRemoteLink } from './remote'
+import { getRemoteLink, getRemoteUrl } from './remote'
 import { fsExistsSync, getExecResult, cleanTag } from './utils'
 import { ERR_MSG } from './constant'
 
@@ -89,11 +89,12 @@ export const generateBaseTags = (options: Partial<IOption>) => {
     for (let version of versions) {
       let { name, date, diff, commits = [] } = version
 
-      logs.push(
-        `\n## [${name}](${getRemoteLink().compareLink}/${diff}) ${
-          options.showDate ? '(' + date + ')' : ''
-        }`
-      )
+      const isInitialVersion = !diff.includes('...')
+      const nameUrl = isInitialVersion
+        ? getRemoteUrl() + '/commits/' + diff
+        : getRemoteLink().compareLink + '/' + diff
+
+      logs.push(`\n## [${name}](${nameUrl}) ${options.showDate ? '(' + date + ')' : ''}`)
 
       // commit max limit
       if (options.commitLimit && commits.length > options.commitLimit) {

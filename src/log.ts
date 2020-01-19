@@ -117,8 +117,8 @@ export const generateBaseTags = (options: Partial<IOption>) => {
 
     // console.log(logs)
     let logContent = logs.join('\n')
-    logContent = logContent.replace(/(#[1-9]\d*)/g, `[\`$1\`](${getRemoteLink().issueLink}/$1)`)
-    logContent = logContent.replace(/(\![1-9]\d*)/g, `[\`$1\`](${getRemoteLink().mergeLink}/$1)`)
+    logContent = logContent.replace(/(#([1-9]\d*))/g, `[\`$1\`](${getRemoteLink().issueLink}/$2)`)
+    logContent = logContent.replace(/(\!([1-9]\d*))/g, `[\`$1\`](${getRemoteLink().mergeLink}/$2)`)
 
     return logContent
   } catch (err) {

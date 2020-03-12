@@ -31,7 +31,7 @@ export const generateBaseTags = (options: Partial<IOption>) => {
   }
 
   if (fsExistsSync(gitTagDir)) {
-    gitTags = readdirSync(gitTagDir)
+    gitTags = getExecResult('git tag').split('\n')
     if (!gitTags.length) {
       throw ERR_MSG.NO_TAG
     }

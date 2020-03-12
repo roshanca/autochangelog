@@ -1,6 +1,6 @@
 {
   "name": "autochangelog",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "Generating changelogs automatically",
   "main": "lib/index.js",
   "bin": {

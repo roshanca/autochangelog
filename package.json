@@ -24,19 +24,33 @@
     "semver-compare": "^1.0.0"
   },
   "devDependencies": {
+    "@types/jest": "^24.9.0",
     "@types/node": "^13.1.4",
     "commitizen": "^4.0.3",
     "cz-adapter-eslint": "^0.3.0",
     "husky": ">=1",
+    "jest": "^24.9.0",
     "lint-staged": ">=8",
     "prettier": "^1.19.1",
     "shx": "^0.3.2",
+    "ts-jest": "^24.3.0",
     "typescript": "^3.7.4"
   },
   "scripts": {
     "start": "tsc -w",
     "build": "shx rm -rf lib/* && tsc",
+    "test": "jest",
     "prepublish": "yarn build"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.ts$"
   },
   "husky": {
     "hooks": {

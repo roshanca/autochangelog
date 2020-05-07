@@ -30,7 +30,7 @@ export const getRemoteUrl = (): string => {
 }
 
 /**
- * Get specific pathname
+ * Get specific pathname from diffirent remote repositories.
  * @param typeIndex 0: commit, 1: issue, 2: merge, 3: compare
  */
 const getRemotePath = (typeIndex: number) => {

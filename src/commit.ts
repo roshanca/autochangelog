@@ -1,5 +1,23 @@
 import { getExecResult } from './utils'
 
+export interface ICommit {
+  hash: string
+  shortHash: string
+  subject: string
+  pureSubject: string
+  type: string
+  scope: string
+  body: string
+  breakingChange: string
+}
+
+export interface IVersion {
+  name: string
+  diff: string
+  date: string
+  commits?: ICommit[]
+}
+
 export const parseCommit = (version: IVersion): ICommit[] => {
   const { diff } = version
 

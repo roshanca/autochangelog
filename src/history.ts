@@ -1,18 +1,19 @@
 import { getRemoteLink } from './remote'
 import { GROUP_MAP } from './constant'
+import { ICommit } from './commit'
 
 let breakingChanges: string[] = []
 
 /**
- * Generate commit history in markdown format
+ * Generate commit history in markdown format.
  * @param commits
  * @param useGroup
  */
-export const makeHistory = (commits: ICommit[], useGroup: boolean = false) => {
+export const makeHistory = (commits: ICommit[], useGroup = false) => {
   let history = useGroup ? makeGroupHistory(commits) : makePlainHistory(commits)
 
   if (breakingChanges.length) {
-    history += `\n\n### BREAKING CHANGES`
+    history += `\n\n### BREAKING CHANGES\n`
 
     breakingChanges.forEach(breakingChange => {
       history += `\n- ${breakingChange}`
@@ -24,7 +25,7 @@ export const makeHistory = (commits: ICommit[], useGroup: boolean = false) => {
 
 /**
  * Group the commits by Conventional Commits guidelines, then
- * output history content by group
+ * output history content by group.
  * @param commits
  */
 const makeGroupHistory = (commits: ICommit[]) => {
@@ -36,7 +37,7 @@ const makeGroupHistory = (commits: ICommit[]) => {
     )
 
     if (targetGroup.length) {
-      groupCommits.push(`\n### ${group}`)
+      groupCommits.push(`\n### ${group}\n`)
       targetGroup.forEach(commit => {
         extractLabels(commit)
         const { hash, shortHash, pureSubject, breakingChange } = commit
@@ -56,7 +57,7 @@ const makeGroupHistory = (commits: ICommit[]) => {
 }
 
 /**
- * Output history content flatly
+ * Output history content individually.
  * @param commits
  */
 const makePlainHistory = (commits: ICommit[]) => {
@@ -77,7 +78,8 @@ const makePlainHistory = (commits: ICommit[]) => {
 }
 
 /**
- * Extract ref labels of issues and merge requests that in body to subject
+ * Extract ref labels of issues and merge requests in commit body,
+ * and add it to the subject. For example: `#1`, `!2` and so on
  * @param commit
  */
 const extractLabels = (commit: ICommit) => {

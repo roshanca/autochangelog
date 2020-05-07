@@ -5,7 +5,7 @@ export const DEFAULT_OPTIONS = {
 }
 
 export const ERR_MSG = {
-  NO_GIT: `It can't be done because this is not a git project.`,
+  NO_GIT: `It can't be done because this project has not yet been initialized with git.`,
   NO_TAG: 'Please create some tags first.'
 }
 

@@ -47,8 +47,8 @@ const logContent = generateBaseTags({
   versionLimit: program.versionLimit
 })
 
-// wirte logs into CHANGELOG file
-writeFileSync(`${process.cwd()}/${program.output}`, logContent)
+// wirte logs into the CHANGELOG file
+writeFileSync(`${process.cwd()}/${program.output}`, logContent + '\n')
 
 const timeSpent = performance.now() - startTime
 console.log(`✨  ChangeLog was generated in ${(timeSpent / 1000).toFixed(3)}s.`)
